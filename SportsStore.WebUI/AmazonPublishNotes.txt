@@ -1,0 +1,6 @@
+aws account: qing_john@hotmail.com 
+remote desktop password: =h?7(kNfDo
+deploy asp.net to aws instance tutorial: https://martinbuberl.com/blog/deploy-aspnet-mvc-on-amazon-ec2-with-web-deploy/
+
+When publishing the website, make sure the "Site name" in the connection page is consistent with the website name on the remoate server. 
+Otherwise it will complain in the "validate connection".
