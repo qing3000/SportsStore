@@ -1,0 +1,53 @@
+﻿@model IList<SportsStore.Domain.Entities.Product>
+
+@{
+    ViewBag.Title = "Edit Products";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<p>
+    Add all products from a page:
+    @using (Html.BeginForm("ParseMultiple", "Admin"))
+    {
+        @Html.Label("Page address:")
+        @Html.TextBox("url", "http://www.next.co.uk/shop/gender-oldergirls-gender-youngergirls-category-dresses#1", new { style = "width: auto" } )
+        <input type="submit" value="Parse" />
+    }
+</p>
+
+@using (Html.BeginForm("AddMultiple", "Admin",new { @Model }))
+{
+    <table class="Grid">
+        <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Brand</th>
+            <th class="NumericCol">Sex</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th class="NumericCol">Price</th>
+            <th>SizeFormat</th>
+            <th>Image</th>
+        </tr>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var @imgLink = Model[i].Thumbnail != null ? Model[i].Thumbnail : "";
+            <tr>
+                <td>@i</td>
+                <td>@Html.TextBoxFor(x => x[i].Name, new { @class = "TextBoxAsLabel" })</td>
+                <td>@Html.TextBoxFor(x => x[i].Brand)</td>
+                <td>@Html.TextBoxFor(x => x[i].Sex)</td>
+                <td>@Html.TextBoxFor(x => x[i].Description)</td>
+                <td>@Html.TextBoxFor(x => x[i].Category)</td>
+                <td>@Html.TextBoxFor(x => x[i].Price)</td>
+                <td>@Html.TextBoxFor(x => x[i].SizeFormat)</td>
+                <td><img height="50" src="@imgLink"/></td>
+                @Html.HiddenFor(x => x[i].ProductID)
+                @Html.HiddenFor(x => x[i].ImageLinks)
+                @Html.HiddenFor(x => x[i].Thumbnail)
+                @Html.HiddenFor(x => x[i].URL)
+            </tr>
+        }
+    </table>
+    <input type="submit" value="Add to Database" />
+}

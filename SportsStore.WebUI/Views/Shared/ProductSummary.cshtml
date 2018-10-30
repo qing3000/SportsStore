@@ -1,0 +1,21 @@
+﻿@model SportsStore.Domain.Entities.Product
+
+<div class="item">
+
+    @if (Model.ImageLinks != null) {
+        <div style="float:left;margin-right:20px">
+            <img width="75" height="75" src="@Model.Thumbnail" />
+        </div>
+    }
+
+    <h3>@Html.ActionLink(Model.Name, "ProductDetails", new { Model.ProductID })</h3>
+    @Model.Brand
+
+    @using(Html.BeginForm("AddToCart", "Cart")) {
+        @Html.HiddenFor(x => x.ProductID)
+        @Html.Hidden("returnUrl", Request.Url.PathAndQuery)
+        <input type="submit" value="+ Add to cart" />
+    }
+
+    <h4>@Model.Price.ToString("c")</h4>
+</div>
