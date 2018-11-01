@@ -15,14 +15,33 @@ namespace SportsStore.Domain.Entities
             Product product = null;
             if (url.Contains(@"next"))
             {
-                product = ParseNextProduct(url);
+                product = ParseNEXTProduct(url);
                 product.URL = url;
+            }
+            else if (url.Contains(@"boden"))
+            {
+                product = ParseBODENProduct(url);
             }
 
             return product;
         }
 
         public static IEnumerable<string> ParsePage(string url)
+        {
+            IEnumerable<string> productURLs = null;
+            if (url.Contains(@"next"))
+            {
+                productURLs = ParseNEXTPage(url);
+            }
+            else if (url.Contains(@"boden"))
+            {
+                productURLs = ParseBODENPage(url);
+            }
+
+            return productURLs;
+        }
+
+        public static IEnumerable<string> ParseNEXTPage(string url)
         {
             IList<string> productURLs = new List<string>();
             HtmlNode rootNode = ReadHtml(url).DocumentNode;
@@ -37,7 +56,24 @@ namespace SportsStore.Domain.Entities
             return productURLs;
         }
 
-        private static Product ParseNextProduct(string url)
+        public static IEnumerable<string> ParseBODENPage(string url)
+        {
+            string rootUrl = @"http://www.boden.co.uk";
+            IList<string> productURLs = new List<string>();
+            HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
+            HtmlNode mainNode = rootNode.SelectSingleNode(@"//div[contains(@class,""product-items"")]");
+            HtmlNodeCollection productNodes = mainNode.SelectNodes(@".//div[@class=""product-item""]");
+            foreach (HtmlNode node in productNodes)
+            {
+
+                HtmlNode imageNode = node.SelectSingleNode(@".//div[@class=""product-image""]");
+                productURLs.Add(rootUrl + imageNode.ChildNodes["a"].Attributes["href"].Value);
+            }
+
+            return productURLs;
+        }
+
+        private static Product ParseNEXTProduct(string url)
         {
             Product product = new Product();
             HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
@@ -108,6 +144,77 @@ namespace SportsStore.Domain.Entities
             return product;
         }
 
+        private static Product ParseBODENProduct(string url)
+        {
+            Product product = new Product();
+            HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
+            product.Brand = @"Boden";
+
+            // Parse the product id from the url.
+            string[] ss = url.Split('/');
+            string productID = ss[ss.Length - 2];
+
+            // Parse the product name
+            HtmlNode currentNode = rootNode.SelectSingleNode(@"//h1[@class=""pdpProductTitle""]");
+            if (currentNode != null)
+            {
+                string productName = currentNode.InnerText.Trim();
+                product.Name = Translator.Translate(productName) + @"-" + productID;
+            }
+
+            // Parse the sex and category.
+            HtmlNode breadNode = rootNode.SelectSingleNode(@"//div[@class=""breadcrumb""]");
+            if (breadNode != null)
+            {
+                HtmlNodeCollection categoryNodes  = breadNode.SelectNodes(@".//li");
+
+                // Parse the sex.
+                product.Sex = categoryNodes[1].InnerText.ToLower().Contains("girl") ? 0 : 1;
+
+                int num = categoryNodes.Count;
+                // Parse the category.
+                if (num > 2)
+                {
+                    string categoryStr = categoryNodes[num - 2].InnerText;
+                    product.Category = Translator.Translate(categoryStr.Trim());
+                }
+            }
+
+            // Parse the description
+            currentNode = rootNode.SelectSingleNode(@"//div[@class=""tabContent pdpProductPnl a-slide""]");
+            if (currentNode != null)
+            {
+                string productDescription = currentNode.InnerText.Trim();
+                product.Description = Translator.Translate(productDescription);
+            }
+
+            // Parse the price
+            currentNode = rootNode.SelectSingleNode(@"//span[@class=""pdpNowPrice""]");
+            if (currentNode != null)
+            {
+                string priceString = currentNode.InnerText;
+                string priceNumberString = new string(priceString.Where(x => Char.IsDigit(x) || x == '.').ToArray());
+                product.Price = Convert.ToDecimal(priceNumberString);
+            }
+
+            // Parse the image links
+            HtmlNode imgContainerNode = rootNode.SelectSingleNode(@"//div[@class=""imageryImagesContainer""]");
+            if (imgContainerNode != null)
+            {
+                IList<string> imgLinks = new List<string>();
+                HtmlNodeCollection imgNodes = imgContainerNode.SelectNodes(@".//img[@class=""cloudzoom""]");
+                foreach (HtmlNode imgNode in imgNodes)
+                {
+                    imgLinks.Add(imgNode.Attributes["src"].Value);
+                }
+
+                product.ImageLinks = string.Join(@";", imgLinks);
+                product.Thumbnail = imgLinks.First();
+            }
+
+            return product;
+        }
+
         private static HtmlDocument ReadHtml(string url)
         {
             WebClient client = new WebClient();
@@ -126,10 +233,10 @@ namespace SportsStore.Domain.Entities
         {
             string output = RunPhantomJS(url);
 
-            //string tmpFile = @"c:\temp\tmp.html";
-            //StreamWriter sw = new StreamWriter(tmpFile);
-            //sw.Write(output);
-            //sw.Close();
+            string tmpFile = @"c:\temp\tmp.html";
+            StreamWriter sw = new StreamWriter(tmpFile);
+            sw.Write(output);
+            sw.Close();
 
             //StreamReader sr = new StreamReader(tmpFile);
             //string output = sr.ReadToEnd();
@@ -142,12 +249,17 @@ namespace SportsStore.Domain.Entities
 
         private static string RunPhantomJS(string url)
         {
+            int urlSplit = url.LastIndexOf('/') + 1;
+            string ss1 = url.Substring(0, urlSplit);
+            string ss2 = WebUtility.UrlEncode(url.Substring(urlSplit));
+            string uri = ss1 + ss2;
+
             string filepath = @"c:\Temp\";
             string jsFile = filepath + @"loadpage.js";
             StreamWriter sw = new StreamWriter(jsFile);
             sw.WriteLine(@"var page = require('webpage').create();");
             sw.WriteLine("var page = require('webpage').create();");
-            sw.WriteLine("page.open('" + url + "');");
+            sw.WriteLine("page.open('" + uri + "');");
             sw.WriteLine("page.settings.javascriptEnabled=true;");
             sw.WriteLine("page.onLoadFinished=function(status){");
             sw.WriteLine("setTimeout(function(){console.log(page.content);phantom.exit()},2000);");
@@ -155,6 +267,9 @@ namespace SportsStore.Domain.Entities
             sw.Close();
 
             string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
+            int index = output.IndexOf("<!DOCTYPE html>");
+            output = output.Substring(index);
+
             return output;
         }
 
