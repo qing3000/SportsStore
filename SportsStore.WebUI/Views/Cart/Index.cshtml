@@ -1,16 +1,16 @@
 ﻿@model SportsStore.WebUI.Models.CartIndexViewModel
 
 @{
-    ViewBag.Title = "Sports Store: Your Cart";
+    ViewBag.Title = "咕咕童装：购物车";
 }
 
-<h2>Your cart</h2>
+<h2>购物车</h2>
 <table width="90%" align="center">
     <thead><tr>
-        <th align="center">Quantity</th>
-        <th align="left">Item</th>
-        <th align="right">Price</th>
-        <th align="right">Subtotal</th>
+        <th align="center">件数</th>
+        <th align="left">商品</th>
+        <th align="right">单价</th>
+        <th align="right">总价</th>
     </tr></thead>
 <tbody>
     @foreach(var line in Model.Cart.Lines) {
@@ -25,20 +25,20 @@
                     @Html.Hidden("ProductId", line.Product.ProductID)
                     @Html.HiddenFor(x => x.ReturnUrl)
                     <input class="actionButtons" type="submit" 
-                        value="Remove" />
+                        value="删除" />
                 }
             </td>
         </tr>
     }
 </tbody>
     <tfoot><tr>
-        <td colspan="3" align="right">Total:</td>
+        <td colspan="3" align="right">总计:</td>
         <td align="right">
             @Model.Cart.ComputeTotalValue().ToString("c")
         </td>
     </tr></tfoot>
 </table>
 <p align="center" class="actionButtons">
-    <a href="@Model.ReturnUrl">Continue shopping</a>
-    @Html.ActionLink("Checkout now", "Checkout")
+    <a href="@Model.ReturnUrl">继续选购</a>
+    @Html.ActionLink("结算", "Checkout")
 </p>

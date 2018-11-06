@@ -32,7 +32,7 @@ namespace SportsStore.WebUI.Controllers {
         [HttpPost]
         public ViewResult Checkout(Cart cart, ShippingDetails shippingDetails) {
             if (cart.Lines.Count() == 0) {
-                ModelState.AddModelError("", "Sorry, your cart is empty!");
+                ModelState.AddModelError("", "抱歉，您的购物车好像是空的!");
             }
 
             if (ModelState.IsValid) {

@@ -1,34 +1,34 @@
 ﻿@model SportsStore.Domain.Entities.ShippingDetails
 
 @{
-    ViewBag.Title = "SportStore: Checkout";
+    ViewBag.Title = "咕咕童装：结算";
 }
 
-<h2>Check out now</h2>
-Please enter your details, and we'll ship your goods right away!
+<h2>结算</h2>
+请输入您的具体信息，我们会及时发货!
 @using (Html.BeginForm()) {
     
     @Html.ValidationSummary()
     
-    <h3>Ship to</h3>
-    <div>Name: @Html.EditorFor(x => x.Name)</div>
+    <h3>发货地址</h3>
+    <div>姓名: @Html.EditorFor(x => x.Name)</div>
 
-    <h3>Address</h3>
-    <div>Line 1: @Html.EditorFor(x => x.Line1)</div>
-    <div>Line 2: @Html.EditorFor(x => x.Line2)</div>
-    <div>Line 3: @Html.EditorFor(x => x.Line3)</div>
-    <div>City: @Html.EditorFor(x => x.City)</div>
-    <div>State: @Html.EditorFor(x => x.State)</div>
-    <div>Zip: @Html.EditorFor(x => x.Zip)</div>
-    <div>Country: @Html.EditorFor(x => x.Country)</div>
+    <h3>地址</h3>
+    <div>第一行: @Html.EditorFor(x => x.Line1)</div>
+    <div>第二行: @Html.EditorFor(x => x.Line2)</div>
+    <div>第三行: @Html.EditorFor(x => x.Line3)</div>
+    <div>城市: @Html.EditorFor(x => x.City)</div>
+    <div>省份: @Html.EditorFor(x => x.State)</div>
+    <div>邮编: @Html.EditorFor(x => x.Zip)</div>
+    <div>国家: @Html.EditorFor(x => x.Country)</div>
 
-    <h3>Options</h3>
+    <h3>选项</h3>
     <label>
         @Html.EditorFor(x => x.GiftWrap)
-        Gift wrap these items
+        礼品包装
     </label>
         
     <p align="center">
-        <input class="actionButtons" type="submit" value="Complete order" />
+        <input class="actionButtons" type="submit" value="完成" />
     </p>
 }
