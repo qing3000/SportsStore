@@ -17,11 +17,11 @@
     {
         <tr>
             <td>@item.ProductID</td>
-            <td>@Html.ActionLink(item.Name, "Edit", new { item.ProductID })</td>
-            <td class="NumericCol">@item.Price.ToString("c")</td>
+            <td>@Html.ActionLink(item.Title, "Edit", new { item.ID })</td>
+            <td class="NumericCol">@item.SizePrices.ToString()</td>
             <td>
                 @using (Html.BeginForm("Delete", "Admin")) {
-                    @Html.Hidden("ProductID", item.ProductID)
+                    @Html.Hidden("ProductID", item.ID)
                     <input type="submit" value="Delete"/>
                 }
             </td>

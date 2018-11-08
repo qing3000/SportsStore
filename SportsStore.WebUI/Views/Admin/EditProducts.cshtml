@@ -31,20 +31,19 @@
         </tr>
         @for (int i = 0; i < Model.Count; i++)
         {
-            var @imgLink = Model[i].Thumbnail != null ? Model[i].Thumbnail : "";
+            var @imgLink = Model[i].ThumbnailLink != null ? Model[i].ThumbnailLink : "";
             <tr>
                 <td>@i</td>
-                <td>@Html.TextBoxFor(x => x[i].Name, new { @class = "TextBoxAsLabel" })</td>
+                <td>@Html.TextBoxFor(x => x[i].Title, new { @class = "TextBoxAsLabel" })</td>
                 <td>@Html.TextBoxFor(x => x[i].Brand)</td>
                 <td>@Html.TextBoxFor(x => x[i].Sex)</td>
                 <td>@Html.TextBoxFor(x => x[i].Description)</td>
                 <td>@Html.TextBoxFor(x => x[i].Category)</td>
-                <td>@Html.TextBoxFor(x => x[i].Price)</td>
-                <td>@Html.TextBoxFor(x => x[i].SizeFormat)</td>
+                <td>@Html.TextBoxFor(x => x[i].SizePrices)</td>
                 <td><img height="50" src="@imgLink"/></td>
                 @Html.HiddenFor(x => x[i].ProductID)
                 @Html.HiddenFor(x => x[i].ImageLinks)
-                @Html.HiddenFor(x => x[i].Thumbnail)
+                @Html.HiddenFor(x => x[i].ThumbnailLink)
                 @Html.HiddenFor(x => x[i].URL)
             </tr>
         }

@@ -15,7 +15,7 @@ namespace SportsStore.Domain.Concrete
 
         public void SaveProduct(Product product)
         {
-            if (product.ProductID == 0)
+            if (product.ID == 0)
             {
                 context.Products.Add(product);
             }
@@ -24,14 +24,12 @@ namespace SportsStore.Domain.Concrete
                 Product dbEntry = context.Products.Find(product.ProductID);
                 if (dbEntry != null)
                 {
-                    dbEntry.Name = product.Name;
+                    dbEntry.Title = product.Title;
                     dbEntry.Description = product.Description;
                     dbEntry.Category = product.Category;
-                    dbEntry.Price = product.Price;
-                    dbEntry.SizeFormat = product.SizeFormat;
-                    dbEntry.ImageLinks = product.ImageLinks;
-                    dbEntry.Thumbnail = product.Thumbnail;
-                    dbEntry.URL = product.URL;
+                    dbEntry.Material = product.Material;
+                    dbEntry.MinimumAge = product.MinimumAge;
+                    dbEntry.MaximumAge = product.MaximumAge;
                 }
             }
             context.SaveChanges();

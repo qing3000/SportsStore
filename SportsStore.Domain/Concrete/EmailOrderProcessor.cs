@@ -25,8 +25,8 @@ namespace SportsStore.Domain.Concrete {
             emailSettings = settings;
         }
 
-        public void ProcessOrder(Cart cart, ShippingDetails shippingInfo) {
-
+        public void ProcessOrder(Cart cart, ShippingDetails shippingInfo)
+        {
             using (var smtpClient = new SmtpClient()) {
 
                 smtpClient.EnableSsl = emailSettings.UseSsl;
@@ -49,10 +49,11 @@ namespace SportsStore.Domain.Concrete {
                     .AppendLine("---")
                     .AppendLine("Items:");
 
-                foreach (var line in cart.Lines) {
-                    var subtotal = line.Product.Price * line.Quantity;
+                foreach (var line in cart.Lines)
+                {
+                    var subtotal = line.Product.SizePrices[line.SizeSelection].Price * line.Quantity;
                     body.AppendFormat("{0} x {1} (subtotal: {2:c}", line.Quantity,
-                                      line.Product.Name,
+                                      line.Product.Title,
                                       subtotal);
                 }
 

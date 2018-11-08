@@ -17,9 +17,9 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1"},
-                new Product {ProductID = 2, Name = "P2"},
-                new Product {ProductID = 3, Name = "P3"},
+                new Product {ID = 1, Title = "P1"},
+                new Product {ID = 2, Title = "P2"},
+                new Product {ID = 3, Title = "P3"},
             }.AsQueryable());
 
             // Arrange - create a controller 
@@ -31,9 +31,9 @@ namespace SportsStore.UnitTests {
 
             // Assert
             Assert.AreEqual(result.Length, 3);
-            Assert.AreEqual("P1", result[0].Name);
-            Assert.AreEqual("P2", result[1].Name);
-            Assert.AreEqual("P3", result[2].Name);
+            Assert.AreEqual("P1", result[0].Title);
+            Assert.AreEqual("P2", result[1].Title);
+            Assert.AreEqual("P3", result[2].Title);
         }
 
 
@@ -43,9 +43,9 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1"},
-                new Product {ProductID = 2, Name = "P2"},
-                new Product {ProductID = 3, Name = "P3"},
+                new Product {ID = 1, Title = "P1"},
+                new Product {ID = 2, Title = "P2"},
+                new Product {ID = 3, Title = "P3"},
             }.AsQueryable());
 
             // Arrange - create the controller
@@ -57,9 +57,9 @@ namespace SportsStore.UnitTests {
             Product p3 = target.Edit(3).ViewData.Model as Product;
 
             // Assert
-            Assert.AreEqual(1, p1.ProductID);
-            Assert.AreEqual(2, p2.ProductID);
-            Assert.AreEqual(3, p3.ProductID);
+            Assert.AreEqual(1, p1.ID);
+            Assert.AreEqual(2, p2.ID);
+            Assert.AreEqual(3, p3.ID);
         }
 
         [TestMethod]
@@ -68,9 +68,9 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1"},
-                new Product {ProductID = 2, Name = "P2"},
-                new Product {ProductID = 3, Name = "P3"},
+                new Product {ID = 1, Title = "P1"},
+                new Product {ID = 2, Title = "P2"},
+                new Product {ID = 3, Title = "P3"},
             }.AsQueryable());
 
             // Arrange - create the controller
@@ -91,7 +91,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the controller
             AdminController target = new AdminController(mock.Object);
             // Arrange - create a product
-            Product product = new Product { Name = "Test" };
+            Product product = new Product { Title = "Test" };
 
             // Act - try to save the product
             ActionResult result = target.Edit(product);
@@ -110,7 +110,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the controller
             AdminController target = new AdminController(mock.Object);
             // Arrange - create a product
-            Product product = new Product { Name = "Test" };
+            Product product = new Product { Title = "Test" };
             // Arrange - add an error to the model state
             target.ModelState.AddModelError("error", "error");
 
@@ -127,25 +127,25 @@ namespace SportsStore.UnitTests {
         public void Can_Delete_Valid_Products() {
 
             // Arrange - create a Product
-            Product prod = new Product { ProductID = 2, Name = "Test" };
+            Product prod = new Product { ID = 2, Title = "Test" };
 
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1"},
+                new Product {ID = 1, Title = "P1"},
                 prod,
-                new Product {ProductID = 3, Name = "P3"},
+                new Product {ID = 3, Title = "P3"},
             }.AsQueryable());
 
             // Arrange - create the controller
             AdminController target = new AdminController(mock.Object);
 
             // Act - delete the product
-            target.Delete(prod.ProductID);
+            target.Delete(prod.ID);
 
             // Assert - ensure that the repository delete method was 
             // called with the correct Product 
-            mock.Verify(m => m.DeleteProduct(prod.ProductID));
+            mock.Verify(m => m.DeleteProduct(prod.ID));
         }
     }
 }

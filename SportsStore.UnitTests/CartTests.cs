@@ -16,15 +16,15 @@ namespace SportsStore.UnitTests {
         public void Can_Add_New_Lines() {
 
             // Arrange - create some test products
-            Product p1 = new Product { ProductID = 1, Name = "P1" };
-            Product p2 = new Product { ProductID = 2, Name = "P2" };
+            Product p1 = new Product { ID = 1, Title = "P1" };
+            Product p2 = new Product { ID = 2, Title = "P2" };
 
             // Arrange - create a new cart
             Cart target = new Cart();
 
             // Act
-            target.AddItem(p1, 1);
-            target.AddItem(p2, 1);
+            target.AddItem(p1, 0, 1);
+            target.AddItem(p2, 0, 1);
             CartLine[] results = target.Lines.ToArray();
 
             // Assert
@@ -37,16 +37,16 @@ namespace SportsStore.UnitTests {
         public void Can_Add_Quantity_For_Existing_Lines() {
 
             // Arrange - create some test products
-            Product p1 = new Product { ProductID = 1, Name = "P1" };
-            Product p2 = new Product { ProductID = 2, Name = "P2" };
+            Product p1 = new Product { ID = 1, Title = "P1" };
+            Product p2 = new Product { ID = 2, Title = "P2" };
 
             // Arrange - create a new cart
             Cart target = new Cart();
 
             // Act
-            target.AddItem(p1, 1);
-            target.AddItem(p2, 1);
-            target.AddItem(p1, 10);
+            target.AddItem(p1, 0, 1);
+            target.AddItem(p2, 0, 1);
+            target.AddItem(p1, 0, 10);
             CartLine[] results = target.Lines.OrderBy(c => c.Product.ProductID).ToArray();
 
             // Assert
@@ -59,17 +59,17 @@ namespace SportsStore.UnitTests {
         public void Can_Remove_Line() {
 
             // Arrange - create some test products
-            Product p1 = new Product { ProductID = 1, Name = "P1" };
-            Product p2 = new Product { ProductID = 2, Name = "P2" };
-            Product p3 = new Product { ProductID = 3, Name = "P3" };
+            Product p1 = new Product { ID = 1, Title = "P1" };
+            Product p2 = new Product { ID = 2, Title = "P2" };
+            Product p3 = new Product { ID = 3, Title = "P3" };
 
             // Arrange - create a new cart
             Cart target = new Cart();
             // Arrange - add some products to the cart
-            target.AddItem(p1, 1);
-            target.AddItem(p2, 3);
-            target.AddItem(p3, 5);
-            target.AddItem(p2, 1);
+            target.AddItem(p1, 0, 1);
+            target.AddItem(p2, 0, 3);
+            target.AddItem(p3, 0, 5);
+            target.AddItem(p2, 0, 1);
 
             // Act
             target.RemoveLine(p2);
@@ -80,19 +80,24 @@ namespace SportsStore.UnitTests {
         }
 
         [TestMethod]
-        public void Calculate_Cart_Total() {
+        public void Calculate_Cart_Total()
+        {
+            PriceInfo[] sizePrices = new PriceInfo[3]
+                { new PriceInfo { Size = "S", Price = 10, Stock = "In Stock" },
+                  new PriceInfo { Size = "M", Price = 20, Stock = "In Stock" },
+                  new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
 
             // Arrange - create some test products
-            Product p1 = new Product { ProductID = 1, Name = "P1", Price = 100M };
-            Product p2 = new Product { ProductID = 2, Name = "P2", Price = 50M };
+            Product p1 = new Product { ID = 1, Title = "P1", SizePrices = sizePrices };
+            Product p2 = new Product { ID = 2, Title = "P2", SizePrices = sizePrices };
 
             // Arrange - create a new cart
             Cart target = new Cart();
 
             // Act
-            target.AddItem(p1, 1);
-            target.AddItem(p2, 1);
-            target.AddItem(p1, 3);
+            target.AddItem(p1, 0, 1);
+            target.AddItem(p2, 0, 1);
+            target.AddItem(p1, 0, 3);
             decimal result = target.ComputeTotalValue();
 
             // Assert
@@ -100,18 +105,23 @@ namespace SportsStore.UnitTests {
         }
 
         [TestMethod]
-        public void Can_Clear_Contents() {
+        public void Can_Clear_Contents()
+        {
+            PriceInfo[] sizePrices = new PriceInfo[3]
+                { new PriceInfo { Size = "S", Price = 10, Stock = "In Stock" },
+                  new PriceInfo { Size = "M", Price = 20, Stock = "In Stock" },
+                  new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
 
             // Arrange - create some test products
-            Product p1 = new Product { ProductID = 1, Name = "P1", Price = 100M };
-            Product p2 = new Product { ProductID = 2, Name = "P2", Price = 50M };
+            Product p1 = new Product { ID = 1, Title = "P1", SizePrices = sizePrices };
+            Product p2 = new Product { ID = 2, Title = "P2", SizePrices = sizePrices };
 
             // Arrange - create a new cart
             Cart target = new Cart();
 
             // Arrange - add some items
-            target.AddItem(p1, 1);
-            target.AddItem(p2, 1);
+            target.AddItem(p1, 0, 1);
+            target.AddItem(p2, 0, 1);
 
             // Act - reset the cart
             target.Clear();
@@ -126,7 +136,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Apples"},
+                new Product {ID = 1, Title = "P1", Category = "Apples"},
             }.AsQueryable());
 
             // Arrange - create a Cart
@@ -136,7 +146,7 @@ namespace SportsStore.UnitTests {
             CartController target = new CartController(mock.Object, null);
 
             // Act - add a product to the cart
-            target.AddToCart(cart, 1, null);
+            target.AddToCart(cart, 1, 0, null);
 
             // Assert
             Assert.AreEqual(cart.Lines.Count(), 1);
@@ -148,7 +158,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Apples"},
+                new Product {ID = 1, Title = "P1", Category = "Apples"},
             }.AsQueryable());
 
             // Arrange - create a Cart
@@ -158,7 +168,7 @@ namespace SportsStore.UnitTests {
             CartController target = new CartController(mock.Object, null);
 
             // Act - add a product to the cart
-            RedirectToRouteResult result = target.AddToCart(cart, 2, "myUrl");
+            RedirectToRouteResult result = target.AddToCart(cart, 2, 0, "myUrl");
 
             // Assert
             Assert.AreEqual(result.RouteValues["action"], "Index");
@@ -213,7 +223,7 @@ namespace SportsStore.UnitTests {
             Mock<IOrderProcessor> mock = new Mock<IOrderProcessor>();
             // Arrange - create a cart with an item
             Cart cart = new Cart();
-            cart.AddItem(new Product(), 1);
+            cart.AddItem(new Product(), 0, 1);
 
             // Arrange - create an instance of the controller
             CartController target = new CartController(null, mock.Object);
@@ -238,7 +248,7 @@ namespace SportsStore.UnitTests {
             Mock<IOrderProcessor> mock = new Mock<IOrderProcessor>();
             // Arrange - create a cart with an item
             Cart cart = new Cart();
-            cart.AddItem(new Product(), 1);
+            cart.AddItem(new Product(), 0, 1);
             // Arrange - create an instance of the controller
             CartController target = new CartController(null, mock.Object);
 

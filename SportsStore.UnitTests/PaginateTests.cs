@@ -10,36 +10,37 @@ using System.Linq;
 using System.Web.Mvc;
 using SportsStore.WebUI.HtmlHelpers;
 
-namespace SportsStore.UnitTests {
+namespace SportsStore.UnitTests
+{
     [TestClass]
-    public class UnitTest1 {
+    public class PaginateTests
+    {
+        [TestMethod]
+        public void Can_Paginate()
+        {
+            // Arrange
+            Mock<IProductRepository> mock = new Mock<IProductRepository>();
+            mock.Setup(m => m.Products).Returns(new Product[] {
+                new Product {ID = 1, Title = "P1"},
+                new Product {ID = 2, Title = "P2"},
+                new Product {ID = 3, Title = "P3"},
+                new Product {ID = 4, Title = "P4"},
+                new Product {ID = 5, Title = "P5"}
+            }.AsQueryable());
 
-[TestMethod]
-public void Can_Paginate() {
+            // create a controller and make the page size 3 items
+            ProductController controller = new ProductController(mock.Object);
+            controller.PageSize = 3;
 
-    // Arrange
-    Mock<IProductRepository> mock = new Mock<IProductRepository>();
-    mock.Setup(m => m.Products).Returns(new Product[] {
-        new Product {ProductID = 1, Name = "P1"},
-        new Product {ProductID = 2, Name = "P2"},
-        new Product {ProductID = 3, Name = "P3"},
-        new Product {ProductID = 4, Name = "P4"},
-        new Product {ProductID = 5, Name = "P5"}
-    }.AsQueryable());
+            // Act
+            ProductsListViewModel result = (ProductsListViewModel)controller.List(null, 2).Model;
 
-    // create a controller and make the page size 3 items
-    ProductController controller = new ProductController(mock.Object);
-    controller.PageSize = 3;
-
-    // Act
-    ProductsListViewModel result = (ProductsListViewModel)controller.List(null, 2).Model;
-
-    // Assert
-    Product[] prodArray = result.Products.ToArray();
-    Assert.IsTrue(prodArray.Length == 2);
-    Assert.AreEqual(prodArray[0].Name, "P4");
-    Assert.AreEqual(prodArray[1].Name, "P5");
-}
+            // Assert
+            Product[] prodArray = result.Products.ToArray();
+            Assert.IsTrue(prodArray.Length == 2);
+            Assert.AreEqual(prodArray[0].Title, "P4");
+            Assert.AreEqual(prodArray[1].Title, "P5");
+        }
 
         [TestMethod]
         public void Can_Generate_Page_Links() {
@@ -73,11 +74,11 @@ public void Can_Paginate() {
             // Arrange
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1"},
-                new Product {ProductID = 2, Name = "P2"},
-                new Product {ProductID = 3, Name = "P3"},
-                new Product {ProductID = 4, Name = "P4"},
-                new Product {ProductID = 5, Name = "P5"}
+                new Product {ID = 1, Title = "P1"},
+                new Product {ID = 2, Title = "P2"},
+                new Product {ID = 3, Title = "P3"},
+                new Product {ID = 4, Title = "P4"},
+                new Product {ID = 5, Title = "P5"}
             }.AsQueryable());
 
             // Arrange - create a controller and make the page size 3 items
@@ -102,11 +103,11 @@ public void Can_Paginate() {
             // - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Cat1"},
-                new Product {ProductID = 2, Name = "P2", Category = "Cat2"},
-                new Product {ProductID = 3, Name = "P3", Category = "Cat1"},
-                new Product {ProductID = 4, Name = "P4", Category = "Cat2"},
-                new Product {ProductID = 5, Name = "P5", Category = "Cat3"}
+                new Product {ID = 1, Title = "P1", Category = "Cat1"},
+                new Product {ID = 2, Title = "P2", Category = "Cat2"},
+                new Product {ID = 3, Title = "P3", Category = "Cat1"},
+                new Product {ID = 4, Title = "P4", Category = "Cat2"},
+                new Product {ID = 5, Title = "P5", Category = "Cat3"}
             }.AsQueryable());
 
             // Arrange - create a controller and make the page size 3 items
@@ -119,8 +120,8 @@ public void Can_Paginate() {
 
             // Assert
             Assert.AreEqual(result.Length, 2);
-            Assert.IsTrue(result[0].Name == "P2" && result[0].Category == "Cat2");
-            Assert.IsTrue(result[1].Name == "P4" && result[1].Category == "Cat2");
+            Assert.IsTrue(result[0].Title == "P2" && result[0].Category == "Cat2");
+            Assert.IsTrue(result[1].Title == "P4" && result[1].Category == "Cat2");
         }
 
         [TestMethod]
@@ -130,10 +131,10 @@ public void Can_Paginate() {
             // - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Apples"},
-                new Product {ProductID = 2, Name = "P2", Category = "Apples"},
-                new Product {ProductID = 3, Name = "P3", Category = "Plums"},
-                new Product {ProductID = 4, Name = "P4", Category = "Oranges"},
+                new Product {ID = 1, Title = "P1", Category = "Apples"},
+                new Product {ID = 2, Title = "P2", Category = "Apples"},
+                new Product {ID = 3, Title = "P3", Category = "Plums"},
+                new Product {ID = 4, Title = "P4", Category = "Oranges"},
             }.AsQueryable());
 
             // Arrange - create the controller
@@ -156,8 +157,8 @@ public void Can_Paginate() {
             // - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Apples"},
-                new Product {ProductID = 4, Name = "P2", Category = "Oranges"},
+                new Product {ID = 1, Title = "P1", Category = "Apples"},
+                new Product {ID = 4, Title = "P2", Category = "Oranges"},
             }.AsQueryable());
 
             // Arrange - create the controller 
@@ -179,11 +180,11 @@ public void Can_Paginate() {
             // - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ProductID = 1, Name = "P1", Category = "Cat1"},
-                new Product {ProductID = 2, Name = "P2", Category = "Cat2"},
-                new Product {ProductID = 3, Name = "P3", Category = "Cat1"},
-                new Product {ProductID = 4, Name = "P4", Category = "Cat2"},
-                new Product {ProductID = 5, Name = "P5", Category = "Cat3"}
+                new Product {ID = 1, Title = "P1", Category = "Cat1"},
+                new Product {ID = 2, Title = "P2", Category = "Cat2"},
+                new Product {ID = 3, Title = "P3", Category = "Cat1"},
+                new Product {ID = 4, Title = "P4", Category = "Cat2"},
+                new Product {ID = 5, Title = "P5", Category = "Cat3"}
             }.AsQueryable());
 
             // Arrange - create a controller and make the page size 3 items
@@ -206,7 +207,5 @@ public void Can_Paginate() {
             Assert.AreEqual(res3, 1);
             Assert.AreEqual(resAll, 5);
         }
-
-
     }
 }

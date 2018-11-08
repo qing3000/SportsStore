@@ -55,10 +55,10 @@
     </div>
 </div>
 <div>
-    <h3>@Model.Name</h3>
+    <h3>@Model.Title</h3>
     <h4>@Model.Brand</h4>
     <h4>@Model.Description</h4>
-    <h4>@Model.Price.ToString("c")</h4>
+    <h4>@Model.SizePrice.ToString("c")</h4>
 
     @using (Html.BeginForm("AddToCart", "Cart"))
     {

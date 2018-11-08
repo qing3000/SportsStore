@@ -60,7 +60,11 @@ namespace SportsStore.Domain.Entities
         {
             string rootUrl = @"http://www.boden.co.uk";
             IList<string> productURLs = new List<string>();
-            HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(ReadHtmlByPhantomJS(url, @"c:\temp\load_page.js"));
+            HtmlNode rootNode = doc.DocumentNode;
+
             HtmlNode mainNode = rootNode.SelectSingleNode(@"//div[contains(@class,""product-items"")]");
             HtmlNodeCollection productNodes = mainNode.SelectNodes(@".//div[@class=""product-item""]");
             foreach (HtmlNode node in productNodes)
@@ -75,16 +79,26 @@ namespace SportsStore.Domain.Entities
 
         private static Product ParseNEXTProduct(string url)
         {
+            Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
+
+            // Write out to file for viewing.
+            StreamWriter sw = new StreamWriter(@"c:\temp\tmp.html");
+            sw.Write(output.Item1);
+            sw.Close();
+
+            // Prepare the product object.
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(output.Item1);
             Product product = new Product();
-            HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
-            product.Brand = @"next";
+            HtmlNode rootNode = doc.DocumentNode;
+            product.Brand = @"Next";
 
             // Parse the product name
             HtmlNode currentNode = rootNode.SelectSingleNode(@"//div[@class=""Title""]");
             if (currentNode != null)
             {
-                string productName = currentNode.InnerText.Trim();
-                product.Name = Translator.Translate(productName);
+                string productTitle = currentNode.InnerText.Trim();
+                product.Title = Translator.Translate(productTitle);
             }
 
 
@@ -94,7 +108,7 @@ namespace SportsStore.Domain.Entities
             {
                 IEnumerable<string> breadCrumbs = currentNodes.Select(x => x.InnerText.Trim());
                 string sexString = string.Join(@"\", breadCrumbs);
-                product.Sex = sexString.ToLower().Contains(@"girl") ? 0 : 1;
+                product.Sex = sexString.ToLower().Contains(@"girl") ? (byte)0 : (byte)1;
 
                 // Parse the category
                 product.Category = Translator.Translate(breadCrumbs.ElementAt(1));
@@ -115,7 +129,7 @@ namespace SportsStore.Domain.Entities
                 string priceString = currentNode.FirstChild.InnerText;
                 string singlePriceString = priceString.Contains(@"-") ? priceString.Split('-').LastOrDefault() : priceString;
                 string priceNumberString = new string(singlePriceString.Where(x => Char.IsDigit(x)).ToArray());
-                product.Price = Convert.ToDecimal(priceNumberString);
+                //product.SizePrices = Convert.ToDecimal(priceNumberString);
             }
 
             // Parse the image links
@@ -138,7 +152,7 @@ namespace SportsStore.Domain.Entities
                 }
 
                 product.ImageLinks = string.Join(@";", imgLinks);
-                product.Thumbnail = imgLinksNode.ChildNodes["ul"].FirstChild.SelectSingleNode(@"a").Attributes[@"href"].Value;
+                product.ThumbnailLink = imgLinksNode.ChildNodes["ul"].FirstChild.SelectSingleNode(@"a").Attributes[@"href"].Value;
             }
 
             return product;
@@ -146,8 +160,18 @@ namespace SportsStore.Domain.Entities
 
         private static Product ParseBODENProduct(string url)
         {
+            Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
+
+            // Write out to file for viewing.
+            StreamWriter sw = new StreamWriter(@"c:\temp\tmp.html");
+            sw.Write(output.Item1);
+            sw.Close();
+
+            // Prepare the product object.
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(output.Item1);
             Product product = new Product();
-            HtmlNode rootNode = ReadHtmlByPhantomJS(url).DocumentNode;
+            HtmlNode rootNode = doc.DocumentNode;
             product.Brand = @"Boden";
 
             // Parse the product id from the url.
@@ -158,8 +182,9 @@ namespace SportsStore.Domain.Entities
             HtmlNode currentNode = rootNode.SelectSingleNode(@"//h1[@class=""pdpProductTitle""]");
             if (currentNode != null)
             {
-                string productName = currentNode.InnerText.Trim();
-                product.Name = Translator.Translate(productName) + @"-" + productID;
+                string productTitle = currentNode.InnerText.Trim();
+                product.Title = productTitle;
+                product.TitleCN = Translator.Translate(productTitle);
             }
 
             // Parse the sex and category.
@@ -169,14 +194,15 @@ namespace SportsStore.Domain.Entities
                 HtmlNodeCollection categoryNodes  = breadNode.SelectNodes(@".//li");
 
                 // Parse the sex.
-                product.Sex = categoryNodes[1].InnerText.ToLower().Contains("girl") ? 0 : 1;
+                product.Sex = categoryNodes[1].InnerText.ToLower().Contains("girl") ? (byte)0 : (byte)1;
 
                 int num = categoryNodes.Count;
                 // Parse the category.
                 if (num > 2)
                 {
-                    string categoryStr = categoryNodes[num - 2].InnerText;
-                    product.Category = Translator.Translate(categoryStr.Trim());
+                    string categoryStr = categoryNodes[num - 2].InnerText.Trim();
+                    product.Category = categoryStr;
+                    product.CategoryCN = Translator.Translate(categoryStr);
                 }
             }
 
@@ -185,17 +211,12 @@ namespace SportsStore.Domain.Entities
             if (currentNode != null)
             {
                 string productDescription = currentNode.InnerText.Trim();
-                product.Description = Translator.Translate(productDescription);
+                product.Description = productDescription;
+                product.DescriptionCN = Translator.Translate(productDescription);
             }
 
-            // Parse the price
-            currentNode = rootNode.SelectSingleNode(@"//span[@class=""pdpNowPrice""]");
-            if (currentNode != null)
-            {
-                string priceString = currentNode.InnerText;
-                string priceNumberString = new string(priceString.Where(x => Char.IsDigit(x) || x == '.').ToArray());
-                product.Price = Convert.ToDecimal(priceNumberString);
-            }
+            // Get the prices
+            product.SizePrices = output.Item2;
 
             // Parse the image links
             HtmlNode imgContainerNode = rootNode.SelectSingleNode(@"//div[@class=""imageryImagesContainer""]");
@@ -209,7 +230,7 @@ namespace SportsStore.Domain.Entities
                 }
 
                 product.ImageLinks = string.Join(@";", imgLinks);
-                product.Thumbnail = imgLinks.First();
+                product.ThumbnailLink = imgLinks.First();
             }
 
             return product;
@@ -229,48 +250,72 @@ namespace SportsStore.Domain.Entities
             return doc;
         }
 
-        private static HtmlDocument ReadHtmlByPhantomJS(string url)
+        private static string ReadHtmlByPhantomJS(string url, string jsLoadPage)
         {
-            string output = RunPhantomJS(url);
-
-            string tmpFile = @"c:\temp\tmp.html";
-            StreamWriter sw = new StreamWriter(tmpFile);
-            sw.Write(output);
-            sw.Close();
-
-            //StreamReader sr = new StreamReader(tmpFile);
-            //string output = sr.ReadToEnd();
-            //sr.Close();
-
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(output);
-            return doc;
-        }
-
-        private static string RunPhantomJS(string url)
-        {
-            int urlSplit = url.LastIndexOf('/') + 1;
-            string ss1 = url.Substring(0, urlSplit);
-            string ss2 = WebUtility.UrlEncode(url.Substring(urlSplit));
-            string uri = ss1 + ss2;
+            //int urlSplit = url.LastIndexOf('/') + 1;
+            //string ss1 = url.Substring(0, urlSplit);
+            //string ss2 = WebUtility.UrlEncode(url.Substring(urlSplit));
+            //string uri = ss1 + ss2;
 
             string filepath = @"c:\Temp\";
-            string jsFile = filepath + @"loadpage.js";
+            string jsFile = filepath + @"temp.js";
+
+            StreamReader sr = new StreamReader(jsLoadPage);
+            string ss = sr.ReadToEnd();
+            sr.Close();
+
             StreamWriter sw = new StreamWriter(jsFile);
-            sw.WriteLine(@"var page = require('webpage').create();");
-            sw.WriteLine("var page = require('webpage').create();");
-            sw.WriteLine("page.open('" + uri + "');");
-            sw.WriteLine("page.settings.javascriptEnabled=true;");
-            sw.WriteLine("page.onLoadFinished=function(status){");
-            sw.WriteLine("setTimeout(function(){console.log(page.content);phantom.exit()},2000);");
-            sw.WriteLine("};");
+            sw.Write(ss.Replace(@"URL", url));
             sw.Close();
 
             string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
-            int index = output.IndexOf("<!DOCTYPE html>");
-            output = output.Substring(index);
 
-            return output;
+            // Extract the page content.
+            string pageContent = ExtractString(output, @"---START OF PAGE---", @"---END OF PAGE---");
+            return pageContent;
+        }
+
+        private static Tuple<string, PriceInfo[]> ParseHtmlByPhantomJS(string url, string jsInfoParser)
+        {
+            string filepath = @"c:\Temp\";
+            string jsFile = filepath + @"temp.js";
+
+            StreamReader sr = new StreamReader(jsInfoParser);
+            string ss = sr.ReadToEnd();
+            sr.Close();
+
+            StreamWriter sw = new StreamWriter(jsFile);
+            sw.Write(ss.Replace(@"URL", url));
+            sw.Close();
+
+            string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
+
+            // Extract the page content.
+            string pageContent = ExtractString(output, @"---START OF PAGE---", @"---END OF PAGE---");
+            string priceInfoString = ExtractString(output, @"---START OF PRICEINFO---", @"---END OF PRICEINFO---");
+            PriceInfo[] priceInfo = ParsePriceInfoString(priceInfoString);
+            return new Tuple<string, PriceInfo[]>(pageContent, priceInfo); ;
+        }
+
+        private static string ExtractString(string s, string startKey, string endKey)
+        {
+            int i0 = s.IndexOf(startKey);
+            int i1 = s.IndexOf(endKey);
+            string substring = s.Substring(i0 + startKey.Length, i1 - i0 - startKey.Length).Trim();
+            return substring;
+        }
+        private static PriceInfo[] ParsePriceInfoString(string infoString)
+        {
+            IList<PriceInfo> priceInfos = new List<PriceInfo>();
+            string[] lines = infoString.Split('\n');
+            foreach (string oneline in lines)
+            {
+                string[] ss = oneline.Split(',');
+                string priceNumberString = new string(ss[1].Where(x => Char.IsDigit(x) || x == '.').ToArray());
+                priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= Convert.ToDecimal(priceNumberString), Stock = ss[2].Trim() });
+            }
+
+            return priceInfos.ToArray();
         }
 
         private static string RunProcess(string command, string arguments)

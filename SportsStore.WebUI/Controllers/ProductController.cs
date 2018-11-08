@@ -38,9 +38,9 @@ namespace SportsStore.WebUI.Controllers {
             return View(viewModel);
         }
 
-        public ViewResult ProductDetails(int productId)
+        public ViewResult ProductDetails(int ID)
         {
-            Product product = repository.Products.FirstOrDefault(p => p.ProductID == productId);
+            Product product = repository.Products.FirstOrDefault(p => p.ID == ID);
             return View(product);
         }
 

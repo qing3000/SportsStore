@@ -31,10 +31,10 @@ namespace SportsStore.WebUI.Controllers {
             return View("Edit", new Product());
         }
 
-        public ViewResult Edit(int productId)
+        public ViewResult Edit(int ID)
         {
             Product product = repository.Products
-                .FirstOrDefault(p => p.ProductID == productId);
+                .FirstOrDefault(p => p.ID == ID);
             return View(product);
         }
 
@@ -44,7 +44,7 @@ namespace SportsStore.WebUI.Controllers {
             if (ModelState.IsValid)
             {
                 repository.SaveProduct(product);
-                TempData["message"] = string.Format("{0} has been saved", product.Name);
+                TempData["message"] = string.Format("{0} has been saved", product.Title);
                 return RedirectToAction("Index");
             }
             else
@@ -54,10 +54,10 @@ namespace SportsStore.WebUI.Controllers {
             }
         }
 
-        public ActionResult ParseProduct(int productId, string productURL)
+        public ActionResult ParseProduct(int ID, string productURL)
         {
             Product product = new Product();
-            product.ProductID = productId;
+            product.ID = ID;
             product.URL = productURL;
             if (productURL != null)
             {
@@ -81,7 +81,7 @@ namespace SportsStore.WebUI.Controllers {
             Product deletedProduct = repository.DeleteProduct(productId);
             if (deletedProduct != null)
             {
-                TempData["message"] = string.Format("{0} was deleted", deletedProduct.Name);
+                TempData["message"] = string.Format("{0} was deleted", deletedProduct.Title);
             }
             return RedirectToAction("Index");
         }
