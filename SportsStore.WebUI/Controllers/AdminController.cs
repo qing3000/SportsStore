@@ -110,7 +110,7 @@ namespace SportsStore.WebUI.Controllers {
         {
             IList<Product> products = new List<Product>();
             IEnumerable<string> productURLs = Parser.ParsePage(url);
-            for (int i = 0; i < productURLs.Count(); i++)
+            for (int i = 0; i < 3; i++)
             {
                 string productURL = productURLs.ElementAt(i);
                 Product product = Parser.ParseProduct(productURL);

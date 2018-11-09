@@ -84,14 +84,14 @@ namespace SportsStore.UnitTests {
         }
 
         [TestMethod]
-        public void Can_Save_Valid_Changes() {
-
+        public void Can_Save_Valid_Changes()
+        {
             // Arrange - create mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             // Arrange - create the controller
             AdminController target = new AdminController(mock.Object);
             // Arrange - create a product
-            Product product = new Product { Title = "Test" };
+            Product product = new Product { ID = 0, Title = "Test" };
 
             // Act - try to save the product
             ActionResult result = target.Edit(product);

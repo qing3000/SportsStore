@@ -173,10 +173,11 @@ namespace SportsStore.Domain.Entities
             Product product = new Product();
             HtmlNode rootNode = doc.DocumentNode;
             product.Brand = @"Boden";
+            product.URL = url;
 
             // Parse the product id from the url.
             string[] ss = url.Split('/');
-            string productID = ss[ss.Length - 2];
+            product.ProductID = ss[ss.Length - 2];
 
             // Parse the product name
             HtmlNode currentNode = rootNode.SelectSingleNode(@"//h1[@class=""pdpProductTitle""]");
@@ -206,13 +207,25 @@ namespace SportsStore.Domain.Entities
                 }
             }
 
-            // Parse the description
+            // Parse the description and material.
             currentNode = rootNode.SelectSingleNode(@"//div[@class=""tabContent pdpProductPnl a-slide""]");
             if (currentNode != null)
             {
-                string productDescription = currentNode.InnerText.Trim();
-                product.Description = productDescription;
-                product.DescriptionCN = Translator.Translate(productDescription);
+                string productDescription = WebUtility.HtmlDecode(currentNode.InnerText.Trim());
+                string[] desStrings = productDescription.Split('\n');
+                product.Description = desStrings[0].Trim();
+                product.DescriptionCN = Translator.Translate(product.Description);
+                if (ss.Length > 1)
+                {
+                    product.Material = String.Join(@"", desStrings.Skip(1)).Trim();
+                    string sentence = product.Material.Replace(@"&", @"and");
+                    product.MaterialCN = Translator.Translate(sentence);
+                }
+                else
+                {
+                    product.Material = @"";
+                    product.MaterialCN = @"";
+                }
             }
 
             // Get the prices
@@ -250,7 +263,7 @@ namespace SportsStore.Domain.Entities
             return doc;
         }
 
-        private static string ReadHtmlByPhantomJS(string url, string jsLoadPage)
+        public static string ReadHtmlByPhantomJS(string url, string jsLoadPage)
         {
             //int urlSplit = url.LastIndexOf('/') + 1;
             //string ss1 = url.Substring(0, urlSplit);
@@ -291,6 +304,7 @@ namespace SportsStore.Domain.Entities
             string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
 
             // Extract the page content.
+
             string pageContent = ExtractString(output, @"---START OF PAGE---", @"---END OF PAGE---");
             string priceInfoString = ExtractString(output, @"---START OF PRICEINFO---", @"---END OF PRICEINFO---");
             PriceInfo[] priceInfo = ParsePriceInfoString(priceInfoString);
@@ -312,7 +326,8 @@ namespace SportsStore.Domain.Entities
             {
                 string[] ss = oneline.Split(',');
                 string priceNumberString = new string(ss[1].Where(x => Char.IsDigit(x) || x == '.').ToArray());
-                priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= Convert.ToDecimal(priceNumberString), Stock = ss[2].Trim() });
+                Decimal price = priceNumberString.Length > 0 ? Convert.ToDecimal(priceNumberString) : -1;
+                priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= price, Stock = ss[2].Trim() });
             }
 
             return priceInfos.ToArray();

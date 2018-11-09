@@ -1,7 +1,4 @@
 ﻿@model SportsStore.Domain.Entities.Product
-
-
-
 @{
     var imageLinks = Model.ImageLinks.Split(';');
     int imageCount = imageLinks.Count();
@@ -55,10 +52,10 @@
     </div>
 </div>
 <div>
-    <h3>@Model.Title</h3>
+    <h3>@Model.TitleCN</h3>
     <h4>@Model.Brand</h4>
-    <h4>@Model.Description</h4>
-    <h4>@Model.SizePrice.ToString("c")</h4>
+    <h4>@Model.DescriptionCN</h4>
+    <h4>@Model.SizePrices.ToString("c")</h4>
 
     @using (Html.BeginForm("AddToCart", "Cart"))
     {
