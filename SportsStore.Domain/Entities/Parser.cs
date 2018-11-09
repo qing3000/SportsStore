@@ -320,6 +320,8 @@ namespace SportsStore.Domain.Entities
         }
         private static PriceInfo[] ParsePriceInfoString(string infoString)
         {
+            Decimal PRICE_RMBRATE = 10;
+            Decimal PRICE_PROFIT = 50;
             IList<PriceInfo> priceInfos = new List<PriceInfo>();
             string[] lines = infoString.Split('\n');
             foreach (string oneline in lines)
@@ -327,7 +329,8 @@ namespace SportsStore.Domain.Entities
                 string[] ss = oneline.Split(',');
                 string priceNumberString = new string(ss[1].Where(x => Char.IsDigit(x) || x == '.').ToArray());
                 Decimal price = priceNumberString.Length > 0 ? Convert.ToDecimal(priceNumberString) : -1;
-                priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= price, Stock = ss[2].Trim() });
+                Decimal priceCN = PRICE_RMBRATE * price + PRICE_PROFIT;
+                priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= price, PriceCN = priceCN, Stock = ss[2].Trim() });
             }
 
             return priceInfos.ToArray();

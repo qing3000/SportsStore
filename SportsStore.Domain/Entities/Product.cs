@@ -8,6 +8,7 @@ namespace SportsStore.Domain.Entities {
     {
         public string Size { get; set; }
         public decimal Price { get; set; }
+        public decimal PriceCN { get; set; }
         public string Stock { get; set; }
     }
 
