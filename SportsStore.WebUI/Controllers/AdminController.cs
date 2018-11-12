@@ -6,7 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.SignalR;
-using SportsStore.Utilities;
+using SportsStore.Helpers;
 using System.Threading;
 
 namespace SportsStore.WebUI.Controllers {
@@ -110,7 +110,9 @@ namespace SportsStore.WebUI.Controllers {
         {
             IList<Product> products = new List<Product>();
             IEnumerable<string> productURLs = Parser.ParsePage(url);
-            for (int i = 0; i < 3; i++)
+            // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
+            // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
+            for (int i = 0; i < productURLs.Count(); i++) 
             {
                 string productURL = productURLs.ElementAt(i);
                 Product product = Parser.ParseProduct(productURL);
@@ -121,6 +123,23 @@ namespace SportsStore.WebUI.Controllers {
                 }
 
                 ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
+            }
+
+            // Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
+            // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
+
+            // Prepare the gender dropdown list. 
+            ViewBag.genderSelectList = new List<SelectListItem>();
+            for (int i = 0; i < GenderClass.GendersCN.Length; i++)
+            {
+                ViewBag.genderSelectList.Add(new SelectListItem() { Text = GenderClass.GendersCN[i], Value = i.ToString() });
+            }
+
+            // Prepare the category dropdown list.
+            ViewBag.categorySelectList = new List<SelectListItem>();
+            for (int i = 0; i < CategoryClass.CategoriesCN.Length; i++)
+            {
+                ViewBag.categorySelectList.Add(new SelectListItem() { Text = CategoryClass.CategoriesCN[i], Value = i.ToString() });
             }
 
             return View("EditProducts", products);

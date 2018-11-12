@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using SportsStore.Domain.Entities;
 
 namespace SportsStore.WebUI.Controllers {
     public class NavController : Controller {
@@ -13,11 +14,11 @@ namespace SportsStore.WebUI.Controllers {
             repository = repo;
         }
 
-        public PartialViewResult Menu(string category = null) {
+        public PartialViewResult Menu(ECategory category) {
 
             ViewBag.SelectedCategory = category;
 
-            IEnumerable<string> categories = repository.Products
+            IEnumerable<ECategory> categories = repository.Products
                                     .Select(x => x.Category)
                                     .Distinct()
                                     .OrderBy(x => x);

@@ -20,7 +20,7 @@ namespace SportsStore.Domain.Entities
             }
             else if (url.Contains(@"boden"))
             {
-                product = ParseBODENProduct(url);
+                product = ParseBodenProduct(url);
             }
 
             return product;
@@ -102,16 +102,15 @@ namespace SportsStore.Domain.Entities
             }
 
 
-            // Parse the sex
+            // Parse the gender.
             HtmlNodeCollection currentNodes = rootNode.SelectNodes(@"//li[contains(@class,""Breadcrumb"")]");
             if (currentNodes != null)
             {
                 IEnumerable<string> breadCrumbs = currentNodes.Select(x => x.InnerText.Trim());
-                string sexString = string.Join(@"\", breadCrumbs);
-                product.Sex = sexString.ToLower().Contains(@"girl") ? (byte)0 : (byte)1;
+                product.Gender = ParseNextGenderString(string.Join(@"\", breadCrumbs));
 
                 // Parse the category
-                product.Category = Translator.Translate(breadCrumbs.ElementAt(1));
+                product.Category = ParseNextCategoryString(breadCrumbs.ElementAt(1));
             }
 
             // Parse the description
@@ -158,7 +157,7 @@ namespace SportsStore.Domain.Entities
             return product;
         }
 
-        private static Product ParseBODENProduct(string url)
+        private static Product ParseBodenProduct(string url)
         {
             Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
 
@@ -194,16 +193,15 @@ namespace SportsStore.Domain.Entities
             {
                 HtmlNodeCollection categoryNodes  = breadNode.SelectNodes(@".//li");
 
-                // Parse the sex.
-                product.Sex = categoryNodes[1].InnerText.ToLower().Contains("girl") ? (byte)0 : (byte)1;
+                // Parse the gender.
+                product.Gender = ParseBodenGenderString(categoryNodes[1].InnerText);
 
                 int num = categoryNodes.Count;
                 // Parse the category.
                 if (num > 2)
                 {
                     string categoryStr = categoryNodes[num - 2].InnerText.Trim();
-                    product.Category = categoryStr;
-                    product.CategoryCN = Translator.Translate(categoryStr);
+                    product.Category = ParseBodenCategoryString(categoryStr);
                 }
             }
 
@@ -245,6 +243,8 @@ namespace SportsStore.Domain.Entities
                 product.ImageLinks = string.Join(@";", imgLinks);
                 product.ThumbnailLink = imgLinks.First();
             }
+
+            product.EntryTime = DateTime.Now;
 
             return product;
         }
@@ -334,6 +334,38 @@ namespace SportsStore.Domain.Entities
             }
 
             return priceInfos.ToArray();
+        }
+
+        private static EGender ParseBodenGenderString(string genderString)
+        {
+            return genderString.ToLower().Contains("girl") ? EGender.FEMALE : EGender.MALE;
+        }
+
+        private static EGender ParseNextGenderString(string genderString)
+        {
+            return genderString.ToLower().Contains("girl") ? EGender.FEMALE : EGender.MALE;
+        }
+
+        private static ECategory ParseBodenCategoryString(string categoryString)
+        {
+            ECategory category = ECategory.OTHERS;
+            if (categoryString.ToLower().Contains(@"dress"))
+            {
+                category = ECategory.DRESSES;
+            }
+
+            return category;
+        }
+
+        private static ECategory ParseNextCategoryString(string categoryString)
+        {
+            ECategory category = ECategory.OTHERS;
+            if (categoryString.ToLower().Contains(@"dress"))
+            {
+                category = ECategory.DRESSES;
+            }
+
+            return category;
         }
 
         private static string RunProcess(string command, string arguments)

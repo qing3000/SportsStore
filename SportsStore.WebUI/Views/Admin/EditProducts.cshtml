@@ -20,33 +20,46 @@
     <table class="Grid">
         <tr>
             <th>No.</th>
-            <th>Name</th>
+            <th>Product ID</th>
+            <th>Title</th>
             <th>Brand</th>
-            <th class="NumericCol">Sex</th>
-            <th>Description</th>
+            <th >Gender</th>
             <th>Category</th>
-            <th class="NumericCol">Price</th>
-            <th>SizeFormat</th>
             <th>Image</th>
         </tr>
         @for (int i = 0; i < Model.Count; i++)
         {
             var @imgLink = Model[i].ThumbnailLink != null ? Model[i].ThumbnailLink : "";
+            ViewBag.genderSelectList[(int)(Model[i].Gender)].Selected = true;
             <tr>
                 <td>@i</td>
-                <td>@Html.TextBoxFor(x => x[i].Title, new { @class = "TextBoxAsLabel" })</td>
-                <td>@Html.TextBoxFor(x => x[i].Brand)</td>
-                <td>@Html.TextBoxFor(x => x[i].Sex)</td>
-                <td>@Html.TextBoxFor(x => x[i].Description)</td>
+                <td>@Html.TextBoxFor(x => x[i].ProductID, new { @readonly = "readonly" })</td>
+                <td>@Html.TextBoxFor(x => x[i].Title, new { @readonly = "readonly" })</td>
+                <td>@Html.TextBoxFor(x => x[i].TitleCN, new { @class = "TextBoxAsLabel" })</td>
+                <td>@Html.DropDownListFor(x => x[i].Gender, (IEnumerable<SelectListItem>)ViewBag.genderSelectList)</td>
                 <td>@Html.TextBoxFor(x => x[i].Category)</td>
-                <td>@Html.TextBoxFor(x => x[i].SizePrices)</td>
-                <td><img height="50" src="@imgLink"/></td>
-                @Html.HiddenFor(x => x[i].ProductID)
+                <td><img height="50" src="@imgLink" /></td>
+                @Html.HiddenFor(x => x[i].Brand)
+                @for (int j = 0; j < Model[i].SizePrices.Length; j++)
+                {
+                    @Html.HiddenFor(x => x[i].SizePrices[j].Size)
+                    @Html.HiddenFor(x => x[i].SizePrices[j].Price)
+                    @Html.HiddenFor(x => x[i].SizePrices[j].PriceCN)
+                    @Html.HiddenFor(x => x[i].SizePrices[j].Stock)
+                }
+                
+                @Html.HiddenFor(x => x[i].Description)
+                @Html.HiddenFor(x => x[i].DescriptionCN)
+                @Html.HiddenFor(x => x[i].Material)
+                @Html.HiddenFor(x => x[i].MaterialCN)
+                @Html.HiddenFor(x => x[i].MinimumAge)
+                @Html.HiddenFor(x => x[i].MaximumAge)
                 @Html.HiddenFor(x => x[i].ImageLinks)
                 @Html.HiddenFor(x => x[i].ThumbnailLink)
                 @Html.HiddenFor(x => x[i].URL)
+                @Html.HiddenFor(x => x[i].EntryTime)
             </tr>
-        }
-    </table>
+            }
+</table>
     <input type="submit" value="Add to Database" />
 }

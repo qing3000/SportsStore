@@ -136,7 +136,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ID = 1, Title = "P1", Category = "Apples"},
+                new Product {ID = 1, Title = "P1", Category = ECategory.SHOES},
             }.AsQueryable());
 
             // Arrange - create a Cart
@@ -158,7 +158,7 @@ namespace SportsStore.UnitTests {
             // Arrange - create the mock repository
             Mock<IProductRepository> mock = new Mock<IProductRepository>();
             mock.Setup(m => m.Products).Returns(new Product[] {
-                new Product {ID = 1, Title = "P1", Category = "Apples"},
+                new Product {ID = 1, Title = "P1", Category = ECategory.BIBS},
             }.AsQueryable());
 
             // Arrange - create a Cart

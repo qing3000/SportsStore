@@ -1,9 +1,67 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
 
-namespace SportsStore.Domain.Entities {
+namespace SportsStore.Domain.Entities
+{
+    public enum EGender
+    {
+        MALE,
+        FEMALE,
+        NEUTRAL
+    }
 
+    public class GenderClass
+    {
+        static public string[] Genders = new string[]
+        {
+            @"Boy",
+            @"Girl",
+            @"Neutral"
+        };
+
+        static public string[] GendersCN = new string[]
+        {
+            @"男孩",
+            @"女孩",
+            @"中性"
+        };
+    }
+    public enum ECategory
+    {
+        DRESSES,
+        SHOES,
+        SOCKES,
+        BIBS,
+        TSHIRTS,
+        OTHERS
+    };
+
+    public class CategoryClass
+    {
+        static public string[] Categories = new string[]
+        {
+            @"Dresses",
+            @"Shoes",
+            @"Socks",
+            @"Bibs",
+            @"T-Shirt",
+            @"Others"
+        };
+
+        static public string[] CategoriesCN = new string[]
+        {
+            @"连衣裙",
+            @"鞋",
+            @"袜子",
+            @"围嘴",
+            @"T恤",
+            @"其他"
+        };
+    };
+
+    [Serializable]
     public class PriceInfo
     {
         public string Size { get; set; }
@@ -12,6 +70,7 @@ namespace SportsStore.Domain.Entities {
         public string Stock { get; set; }
     }
 
+    [Serializable]
     public class Product {
 
         [HiddenInput(DisplayValue = false)]
@@ -30,7 +89,7 @@ namespace SportsStore.Domain.Entities {
         public string ProductID { get; set; }
 
         [Required]
-        public byte Sex { get; set; }
+        public EGender Gender { get; set; }
 
         [DataType(DataType.MultilineText)]
         [Required]
@@ -41,21 +100,17 @@ namespace SportsStore.Domain.Entities {
         public string DescriptionCN { get; set; }
 
         [DataType(DataType.MultilineText)]
-        [Required(ErrorMessage = "Please enter a description")]
+        [Required]
         public string Material { get; set; }
 
         [DataType(DataType.MultilineText)]
-        [Required(ErrorMessage = "Please enter a description")]
+        [Required]
         public string MaterialCN { get; set; }
 
-        [Required(ErrorMessage = "Please specify a category")]
-        public string Category { get; set; }
-
-        [Required(ErrorMessage = "Please specify a category")]
-        public string CategoryCN { get; set; }
+        [Required]
+        public ECategory Category { get; set; }
 
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Please enter a valid price")] 
         public PriceInfo[] SizePrices { get; set; }
 
         [Required]
@@ -69,10 +124,13 @@ namespace SportsStore.Domain.Entities {
         [Required]
         public string URL { get; set; }
 
-        [HiddenInput(DisplayValue = false)]
+        [Required]
         public string ThumbnailLink { get; set; }
 
-        [HiddenInput(DisplayValue = false)]
+        [Required]
         public string ImageLinks { get; set; }
+
+        [Required]
+        public DateTime EntryTime;
     }
 }

@@ -5,7 +5,7 @@ using System.Web;
 using Microsoft.AspNet.SignalR;
 using SportsStore.Hubs;
 
-namespace SportsStore.Utilities
+namespace SportsStore.Helpers
 {
     public class ProgressBarFunctions
     {
