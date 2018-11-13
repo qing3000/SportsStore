@@ -40,14 +40,7 @@
                 <td>@Html.TextBoxFor(x => x[i].Category)</td>
                 <td><img height="50" src="@imgLink" /></td>
                 @Html.HiddenFor(x => x[i].Brand)
-                @for (int j = 0; j < Model[i].SizePrices.Length; j++)
-                {
-                    @Html.HiddenFor(x => x[i].SizePrices[j].Size)
-                    @Html.HiddenFor(x => x[i].SizePrices[j].Price)
-                    @Html.HiddenFor(x => x[i].SizePrices[j].PriceCN)
-                    @Html.HiddenFor(x => x[i].SizePrices[j].Stock)
-                }
-                
+                @Html.HiddenFor(x => x[i].SizePricesBinary)
                 @Html.HiddenFor(x => x[i].Description)
                 @Html.HiddenFor(x => x[i].DescriptionCN)
                 @Html.HiddenFor(x => x[i].Material)
@@ -57,7 +50,8 @@
                 @Html.HiddenFor(x => x[i].ImageLinks)
                 @Html.HiddenFor(x => x[i].ThumbnailLink)
                 @Html.HiddenFor(x => x[i].URL)
-                @Html.HiddenFor(x => x[i].EntryTime)
+                @Html.HiddenFor(x => x[i].InsertTime)
+                @Html.HiddenFor(x => x[i].UpdateTime)
             </tr>
             }
 </table>

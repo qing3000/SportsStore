@@ -18,7 +18,7 @@
         <tr>
             <td>@item.ProductID</td>
             <td>@Html.ActionLink(item.Title, "Edit", new { item.ID })</td>
-            <td class="NumericCol">@item.SizePrices.ToString()</td>
+            @*<td class="NumericCol">@item.SizePrices.ToString()</td>*@
             <td>
                 @using (Html.BeginForm("Delete", "Admin")) {
                     @Html.Hidden("ProductID", item.ID)

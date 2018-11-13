@@ -38,7 +38,7 @@ namespace SportsStore.Domain.Entities.Tests
         {
             string url = "http://www.boden.co.uk/en-gb/girls-dresses/knitted-dresses/g1095-red/girls-polish-red-snowmen-fair-isle-knitted-dress";
             Product product = Parser.ParseProduct(url);
-            Assert.IsTrue(product.SizePrices.Length > 0);
+            Assert.IsTrue(product.GetPriceInfos().Length > 0);
         }
     }
 }

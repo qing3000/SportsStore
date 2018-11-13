@@ -87,9 +87,12 @@ namespace SportsStore.UnitTests {
                   new PriceInfo { Size = "M", Price = 20, Stock = "In Stock" },
                   new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
 
+
             // Arrange - create some test products
-            Product p1 = new Product { ID = 1, Title = "P1", SizePrices = sizePrices };
-            Product p2 = new Product { ID = 2, Title = "P2", SizePrices = sizePrices };
+            Product p1 = new Product { ID = 1, Title = "P1"};
+            p1.SetPriceInfos(sizePrices);
+            Product p2 = new Product { ID = 2, Title = "P2"};
+            p2.SetPriceInfos(sizePrices);
 
             // Arrange - create a new cart
             Cart target = new Cart();
@@ -113,8 +116,10 @@ namespace SportsStore.UnitTests {
                   new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
 
             // Arrange - create some test products
-            Product p1 = new Product { ID = 1, Title = "P1", SizePrices = sizePrices };
-            Product p2 = new Product { ID = 2, Title = "P2", SizePrices = sizePrices };
+            Product p1 = new Product { ID = 1, Title = "P1" };
+            p1.SetPriceInfos(sizePrices);
+            Product p2 = new Product { ID = 2, Title = "P2" };
+            p1.SetPriceInfos(sizePrices);
 
             // Arrange - create a new cart
             Cart target = new Cart();

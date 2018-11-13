@@ -3,6 +3,7 @@ using System.Text;
 using SportsStore.Domain.Abstract;
 using SportsStore.Domain.Entities;
 using System.Net;
+using System.IO;
 
 namespace SportsStore.Domain.Concrete {
 
@@ -51,7 +52,9 @@ namespace SportsStore.Domain.Concrete {
 
                 foreach (var line in cart.Lines)
                 {
-                    var subtotal = line.Product.SizePrices[line.SizeSelection].Price * line.Quantity;
+                    PriceInfo[] sizePrices = line.Product.GetPriceInfos();
+                    
+                    var subtotal = sizePrices[line.SizeSelection].Price * line.Quantity;
                     body.AppendFormat("{0} x {1} (subtotal: {2:c}", line.Quantity,
                                       line.Product.Title,
                                       subtotal);

@@ -110,9 +110,9 @@ namespace SportsStore.WebUI.Controllers {
         {
             IList<Product> products = new List<Product>();
             IEnumerable<string> productURLs = Parser.ParsePage(url);
-            // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
+            Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
             // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
-            for (int i = 0; i < productURLs.Count(); i++) 
+            for (int i = 0; i < productURLs.Count(); i++)
             {
                 string productURL = productURLs.ElementAt(i);
                 Product product = Parser.ParseProduct(productURL);
@@ -125,7 +125,7 @@ namespace SportsStore.WebUI.Controllers {
                 ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
             }
 
-            // Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
+            Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
             // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
 
             // Prepare the gender dropdown list. 

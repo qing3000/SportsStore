@@ -226,8 +226,8 @@ namespace SportsStore.Domain.Entities
                 }
             }
 
-            // Get the prices
-            product.SizePrices = output.Item2;
+            // Get the prices.
+            product.SetPriceInfos(output.Item2);
 
             // Parse the image links
             HtmlNode imgContainerNode = rootNode.SelectSingleNode(@"//div[@class=""imageryImagesContainer""]");
@@ -244,8 +244,8 @@ namespace SportsStore.Domain.Entities
                 product.ThumbnailLink = imgLinks.First();
             }
 
-            product.EntryTime = DateTime.Now;
-
+            product.InsertTime = DateTime.Now;
+            product.UpdateTime = DateTime.Now;
             return product;
         }
 

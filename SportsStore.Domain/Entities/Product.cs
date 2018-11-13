@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Web.Mvc;
 
 namespace SportsStore.Domain.Entities
@@ -111,15 +112,15 @@ namespace SportsStore.Domain.Entities
         public ECategory Category { get; set; }
 
         [Required]
-        public PriceInfo[] SizePrices { get; set; }
+        public byte[] SizePricesBinary { get; set; }
 
         [Required]
         [Range(0, 200, ErrorMessage = "Please enter a valid age")]
-        public double MinimumAge { get; set; }
+        public Single MinimumAge { get; set; }
 
         [Required]
         [Range(0, 200, ErrorMessage = "Please enter a valid age")]
-        public double MaximumAge { get; set; }
+        public Single MaximumAge { get; set; }
 
         [Required]
         public string URL { get; set; }
@@ -131,6 +132,25 @@ namespace SportsStore.Domain.Entities
         public string ImageLinks { get; set; }
 
         [Required]
-        public DateTime EntryTime;
+        public DateTime InsertTime { get; set; }
+
+        [Required]
+        public DateTime UpdateTime { get; set; }
+
+        public void SetPriceInfos(PriceInfo[] priceInfos)
+        {
+            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            MemoryStream priceStream = new MemoryStream();
+            binaryFormatter.Serialize(priceStream, priceInfos);
+            this.SizePricesBinary = priceStream.ToArray();
+        }
+
+        public PriceInfo[] GetPriceInfos()
+        {
+            var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            MemoryStream priceStream = new MemoryStream(this.SizePricesBinary);
+            PriceInfo[] prices = (PriceInfo[])binaryFormatter.Deserialize(priceStream);
+            return prices;
+        }
     }
 }
