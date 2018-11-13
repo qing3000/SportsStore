@@ -9,19 +9,21 @@
 <table class="Grid">
     <tr>
         <th>ID</th>
+        <th>Brand</th>
         <th>Name</th>
-        <th class="NumericCol">Price</th>
+        <th>Name (CN)</th>
         <th>Actions</th>
     </tr>
     @foreach (var item in Model)
     {
         <tr>
             <td>@item.ProductID</td>
+            <td>@item.Brand</td>
             <td>@Html.ActionLink(item.Title, "Edit", new { item.ID })</td>
-            @*<td class="NumericCol">@item.SizePrices.ToString()</td>*@
+            <td>@item.TitleCN</td>
             <td>
-                @using (Html.BeginForm("Delete", "Admin")) {
-                    @Html.Hidden("ProductID", item.ID)
+                @using (Html.BeginForm("Delete", "Admin"))
+                {
                     <input type="submit" value="Delete"/>
                 }
             </td>

@@ -1,6 +1,7 @@
 ﻿using SportsStore.Domain.Abstract;
 using SportsStore.Domain.Entities;
 using System.Linq;
+using System;
 
 namespace SportsStore.Domain.Concrete
 {
@@ -13,27 +14,38 @@ namespace SportsStore.Domain.Concrete
             get { return context.Products; }
         }
 
-        public void SaveProduct(Product product)
+        public bool SaveProduct(Product product)
         {
+            bool ret = false;
             if (product.ID == 0)
             {
-                context.Products.Add(product);
+                Product dbEntry = context.Products.First(x => x.ProductID == product.ProductID && x.Brand == product.Brand);
+                if (dbEntry == null)
+                {
+                    context.Products.Add(product);
+                    ret = true;
+                }
             }
             else
             {
                 Product dbEntry = context.Products.Find(product.ProductID);
                 if (dbEntry != null)
                 {
-                    dbEntry.Title = product.Title;
-                    dbEntry.Description = product.Description;
+                    dbEntry.TitleCN = product.TitleCN;
+                    dbEntry.DescriptionCN = product.DescriptionCN;
                     dbEntry.Category = product.Category;
-                    dbEntry.Material = product.Material;
+                    dbEntry.MaterialCN = product.MaterialCN;
                     dbEntry.MinimumAge = product.MinimumAge;
                     dbEntry.MaximumAge = product.MaximumAge;
+                    dbEntry.SizePricesBinary = product.SizePricesBinary;
+                    dbEntry.Gender = product.Gender;
+                    dbEntry.UpdateTime = DateTime.Now;
+                    ret = true;
                 }
             }
 
             context.SaveChanges();
+            return ret; 
         }
 
         public Product DeleteProduct(int productID)

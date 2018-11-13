@@ -95,12 +95,23 @@ namespace SportsStore.WebUI.Controllers {
         {
             if (ModelState.IsValid)
             {
+                int counter = 0;
                 foreach (Product product in products)
                 {
-                    repository.SaveProduct(product);
+                    if (repository.SaveProduct(product))
+                    {
+                        counter++;
+                    }
                 }
 
-                TempData["message"] = string.Format("{0} new products have been saved", products.Count());
+                string msg1 = string.Format("{0} new products have been saved.", counter);
+                string msg2 = "";
+                if (counter < products.Count())
+                {
+                    msg2 = string.Format(" {0} products already exist in the database.", products.Count() - counter);
+                }
+
+                TempData["message"] = msg1 + msg2;
             }
 
             return RedirectToAction("Index");
@@ -109,24 +120,24 @@ namespace SportsStore.WebUI.Controllers {
         public ViewResult ParseMultiple(string url)
         {
             IList<Product> products = new List<Product>();
-            IEnumerable<string> productURLs = Parser.ParsePage(url);
-            Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
-            // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
-            for (int i = 0; i < productURLs.Count(); i++)
-            {
-                string productURL = productURLs.ElementAt(i);
-                Product product = Parser.ParseProduct(productURL);
-                if (product != null)
-                {
-                    product.URL = productURL;
-                    products.Add(product);
-                }
+            // IEnumerable<string> productURLs = Parser.ParsePage(url);
+            // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
+            IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
+            //for (int i = 0; i < productURLs.Count(); i++)
+            //{
+            //    string productURL = productURLs.ElementAt(i);
+            //    Product product = Parser.ParseProduct(productURL);
+            //    if (product != null)
+            //    {
+            //        product.URL = productURL;
+            //        products.Add(product);
+            //    }
 
-                ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
-            }
+            //    ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
+            //}
 
-            Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
-            // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
+            // Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
+            products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
 
             // Prepare the gender dropdown list. 
             ViewBag.genderSelectList = new List<SelectListItem>();
