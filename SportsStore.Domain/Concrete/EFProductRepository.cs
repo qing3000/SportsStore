@@ -28,7 +28,7 @@ namespace SportsStore.Domain.Concrete
             }
             else
             {
-                Product dbEntry = context.Products.Find(product.ProductID);
+                Product dbEntry = context.Products.Find(product.ID);
                 if (dbEntry != null)
                 {
                     dbEntry.TitleCN = product.TitleCN;

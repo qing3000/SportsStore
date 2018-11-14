@@ -18,12 +18,16 @@ DIV.Message { background: gray; color:White; padding: .2em; margin-top:.25em; }
 .editor-field { margin-bottom: .8em; }
 .editor-label { font-weight: bold; }
 .editor-label:after { content: ":" }
-.text-box { width: 25em; }
+.text-box-noborder { width: 50em; border:none; }
+.text-box { width: 50em; }
 .multi-line { height: 5em; font-family: Segoe UI, Verdana; }
 
 
 .TextBoxAsLabel
 {
-   border-color : white;
+   /*border-color : white;*/
    /*outline: none;*/
+   border:none;
+   box-shadow:none;
 }
+

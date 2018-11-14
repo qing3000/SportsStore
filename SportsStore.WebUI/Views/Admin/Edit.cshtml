@@ -1,32 +1,92 @@
-﻿@model SportsStore.Domain.Entities.Product
+﻿@model SportsStore.WebUI.Models.ProductAdminViewModel
 
 @{
-    ViewBag.Title = "Admin: Edit " + @Model.Title;
+    ViewBag.Title = "Admin: Edit " + @Model.product.Title;
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    var ID = Model.ID;
-    var productURL = Model.URL;
+    var desRows = (int)(Model.product.Description.Length / 100 + 0.5) + 1;
+    var desCNRows = (int)(Model.product.DescriptionCN.Length / 50 + 0.5) + 1;
+    var matRows = (int)(Model.product.Material.Length / 100 + 0.5) + 1;
+    var matCNRows = (int)(Model.product.MaterialCN.Length / 50 + 0.5) + 1;
 }
+<style>
+th, td { padding: 10px;} 
+</style>
 
-<h1>Edit @Model.Title</h1>
-
-@using (Html.BeginForm("Edit", "Admin", new { @Model }))
+@using (Html.BeginForm("Edit", "Admin"))
 {
-    @Html.EditorForModel()
-    <button onclick="location.href='@Url.Action("ParseProduct", "Admin", new { ID, productURL })';return false;">Parse Product</button>
-    <div class="editor-label">Image</div>
-    <div class="editor-field">
-        @if (Model.ThumbnailLink == null)
-        {
-            @:None
-        }
-        else
-        {
-            <img width="30" src="@Model.ThumbnailLink" />
-        }
-    </div>
-    @Html.HiddenFor(x => x.ID)
-    @Html.HiddenFor(x => x.ImageLinks)
-    @Html.HiddenFor(x => x.ThumbnailLink)
+    <table style="width:100%">
+        <tr>
+            <th>URL:</th>
+            <td>@Html.TextBoxFor(x => x.product.URL, new { @readonly = "readonly", @class = "TextBoxAsLabel", @size = 200 })</td>
+        </tr>
+        <tr>
+            <th>ProducID:</th>
+            <td>@Html.TextBoxFor(x => x.product.ProductID, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+        </tr>
+        <tr>
+            <th>Brand:</th>
+            <td>@Html.TextBoxFor(x => x.product.Brand, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+        </tr>
+        <tr>
+            <th>Title:</th>
+            <td>@Html.TextBoxFor(x => x.product.Title, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+        </tr>
+        <tr>
+            <th>标题:</th>
+            <td>@Html.TextBoxFor(x => x.product.TitleCN)</td>
+        </tr>
+        <tr>
+            <th>Description:</th>
+            <td>@Html.TextAreaFor(x => x.product.Description, new { @readonly = "readonly", @class = "text-box-noborder", @rows = @desRows })</td>
+        </tr>
+        <tr>
+            <th>描述:</th>
+            <td>@Html.TextAreaFor(x => x.product.DescriptionCN, new { @class = "text-box", @rows = @desCNRows })</td>
+        </tr>
+        <tr>
+            <th>Material:</th>
+            <td>@Html.TextAreaFor(x => x.product.Material, new { @readonly = "readonly", @class = "text-box-noborder", @rows = @matRows })</td>
+        </tr>
+        <tr>
+            <th>材质:</th>
+            <td>@Html.TextAreaFor(x => x.product.MaterialCN, new { @class = "text-box", @rows = @matCNRows })</td>
+        </tr>
+        <tr>
+            <th>Image:</th>
+            <td><img width="30" src="@Model.product.ThumbnailLink" /></td>
+        </tr>
+        <tr>
+            <th>Sizes:</th>
+            <td>
+                <table>
+                    <tr>
+                        <th>Size:</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>人民币价格</th>
+                    </tr>
+                    @for (int i = 0; i < @Model.prices.Length; i++)
+                    {
+                        <tr>
+                            <td>@Html.TextBoxFor(x => x.prices[i].Size, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+                            <td>£@Html.TextBoxFor(x => x.prices[i].Price, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+                            <td>@Html.TextBoxFor(x => x.prices[i].Stock, new { @readonly = "readonly", @class = "TextBoxAsLabel" })</td>
+                            @*<td>£@Model.prices[i].Price</td>
+                            <td>@Model.prices[i].Stock</td>*@
+                            <td>¥@Html.TextBoxFor(x => x.prices[i].PriceCN, new { size = 5 })</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+    </table>
+    @Html.HiddenFor(x => x.product.ID)
+    @Html.HiddenFor(x => x.product.ImageLinks)
+    @Html.HiddenFor(x => x.product.ThumbnailLink)
+    @Html.HiddenFor(x => x.product.SizePricesBinary)
+    @Html.HiddenFor(x => x.product.InsertTime)
+    @Html.HiddenFor(x => x.product.UpdateTime)
     <input type="submit" value="Save" />
     @Html.ActionLink("Cancel and return to List", "Index")
 }
+<br /><br />

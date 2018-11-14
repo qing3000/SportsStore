@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using SportsStore.WebUI.Models;
 
 namespace SportsStore.UnitTests {
     [TestClass]
@@ -92,9 +93,14 @@ namespace SportsStore.UnitTests {
             AdminController target = new AdminController(mock.Object);
             // Arrange - create a product
             Product product = new Product { ID = 0, Title = "Test" };
+            PriceInfo[] sizePrices = new PriceInfo[3]
+                { new PriceInfo { Size = "S", Price = 10, Stock = "In Stock" },
+                  new PriceInfo { Size = "M", Price = 20, Stock = "In Stock" },
+                  new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
 
             // Act - try to save the product
-            ActionResult result = target.Edit(product);
+            ProductAdminViewModel productViewModel = new ProductAdminViewModel() { product = product, prices = sizePrices };
+            ActionResult result = target.Edit(productViewModel);
 
             // Assert - check that the repository was called
             mock.Verify(m => m.SaveProduct(product));
@@ -114,8 +120,13 @@ namespace SportsStore.UnitTests {
             // Arrange - add an error to the model state
             target.ModelState.AddModelError("error", "error");
 
+            PriceInfo[] sizePrices = new PriceInfo[3]
+                { new PriceInfo { Size = "S", Price = 10, Stock = "In Stock" },
+                  new PriceInfo { Size = "M", Price = 20, Stock = "In Stock" },
+                  new PriceInfo { Size = "L", Price = 30, Stock = "In Stock" }};
             // Act - try to save the product
-            ActionResult result = target.Edit(product);
+            ProductAdminViewModel productViewModel = new ProductAdminViewModel() { product = product, prices = sizePrices };
+            ActionResult result = target.Edit(productViewModel);
 
             // Assert - check that the repository was not called
             mock.Verify(m => m.SaveProduct(It.IsAny<Product>()), Times.Never());

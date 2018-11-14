@@ -215,7 +215,7 @@ namespace SportsStore.Domain.Entities
                 product.DescriptionCN = Translator.Translate(product.Description);
                 if (ss.Length > 1)
                 {
-                    product.Material = String.Join(@"", desStrings.Skip(1)).Trim();
+                    product.Material = String.Join(@"", desStrings.Skip(1)).Trim().Replace(@"\n", @" ").Replace(@"\r",@"");
                     string sentence = product.Material.Replace(@"&", @"and");
                     product.MaterialCN = Translator.Translate(sentence);
                 }

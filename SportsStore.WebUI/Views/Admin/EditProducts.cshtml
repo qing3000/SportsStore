@@ -6,14 +6,25 @@
 }
 
 <p>
-    Add all products from a page:
+    Add one products from a page:
+    @using (Html.BeginForm("ParseProduct", "Admin"))
+    {
+        @Html.Label("Page address:")
+        @Html.TextBox("productURL", "http://www.boden.co.uk/en-gb/girls-dresses/knitted-dresses/g1095-red/girls-polish-red-snowmen-fair-isle-knitted-dress", new { style = "width: 70%" })
+        <input type="submit" value="Parse one" />
+    }
+</p>
+
+<p>
+    Add multiple products from a page:
     @using (Html.BeginForm("ParseMultiple", "Admin"))
     {
         @Html.Label("Page address:")
-        @Html.TextBox("url", "http://www.boden.co.uk/en-gb/girls-dresses", new { style = "width: auto" } )
-        <input type="submit" value="Parse" />
+        @Html.TextBox("url", "http://www.boden.co.uk/en-gb/girls-dresses", new { style = "width: 70%" })
+        <input type="submit" value="Parse multiple" />
     }
 </p>
+
 
 @using (Html.BeginForm("AddMultiple", "Admin",new { @Model }))
 {

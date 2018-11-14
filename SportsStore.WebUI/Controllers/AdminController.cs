@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using Microsoft.AspNet.SignalR;
 using SportsStore.Helpers;
 using System.Threading;
+using SportsStore.WebUI.Models;
 
 namespace SportsStore.WebUI.Controllers {
 
@@ -28,21 +29,24 @@ namespace SportsStore.WebUI.Controllers {
 
         public ViewResult Create()
         {
-            return View("Edit", new Product());
+            return View("Edit", new ProductAdminViewModel());
         }
 
         public ViewResult Edit(int ID)
         {
             Product product = repository.Products
                 .FirstOrDefault(p => p.ID == ID);
-            return View(product);
+            ProductAdminViewModel productViewModel = new ProductAdminViewModel() { product = product, prices = product.GetPriceInfos() };
+            return View(productViewModel);
         }
 
         [HttpPost]
-        public ActionResult Edit(Product product)
+        public ActionResult Edit(ProductAdminViewModel productViewModel)
         {
             if (ModelState.IsValid)
             {
+                Product product = productViewModel.product;
+                product.SetPriceInfos(productViewModel.prices);
                 repository.SaveProduct(product);
                 TempData["message"] = string.Format("{0} has been saved", product.Title);
                 return RedirectToAction("Index");
@@ -50,14 +54,14 @@ namespace SportsStore.WebUI.Controllers {
             else
             {
                 // there is something wrong with the data values
-                return View(product);
+                return View(productViewModel.product);
             }
         }
 
-        public ActionResult ParseProduct(int ID, string productURL)
+        public ActionResult ParseProduct(string productURL)
         {
             Product product = new Product();
-            product.ID = ID;
+            product.ID = 0;
             product.URL = productURL;
             if (productURL != null)
             {
@@ -72,8 +76,11 @@ namespace SportsStore.WebUI.Controllers {
                 TempData["message"] = @"Invalid product link";
             }
 
-            return View("Edit", product);
+            ProductAdminViewModel productViewModel = new ProductAdminViewModel() { product = product, prices = product.GetPriceInfos() };
+            return View("Edit", productViewModel);
         }
+
+
 
         [HttpPost]
         public ActionResult Delete(int productId)
@@ -120,24 +127,24 @@ namespace SportsStore.WebUI.Controllers {
         public ViewResult ParseMultiple(string url)
         {
             IList<Product> products = new List<Product>();
-            // IEnumerable<string> productURLs = Parser.ParsePage(url);
+            IEnumerable<string> productURLs = Parser.ParsePage(url);
             // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
-            IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
-            //for (int i = 0; i < productURLs.Count(); i++)
-            //{
-            //    string productURL = productURLs.ElementAt(i);
-            //    Product product = Parser.ParseProduct(productURL);
-            //    if (product != null)
-            //    {
-            //        product.URL = productURL;
-            //        products.Add(product);
-            //    }
+            // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
+            for (int i = 0; i < productURLs.Count(); i++)
+            {
+                string productURL = productURLs.ElementAt(i);
+                Product product = Parser.ParseProduct(productURL);
+                if (product != null)
+                {
+                    product.URL = productURL;
+                    products.Add(product);
+                }
 
-            //    ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
-            //}
+                ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
+            }
 
             // Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
-            products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
+            // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
 
             // Prepare the gender dropdown list. 
             ViewBag.genderSelectList = new List<SelectListItem>();
