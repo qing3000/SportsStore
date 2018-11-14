@@ -7,23 +7,24 @@ using System.Web.Mvc;
 using SportsStore.Domain.Entities;
 
 namespace SportsStore.WebUI.Controllers {
-    public class NavController : Controller {
+    public class NavController : Controller
+    {
         private IProductRepository repository;
 
-        public NavController(IProductRepository repo) {
+        public NavController(IProductRepository repo)
+        {
             repository = repo;
         }
 
-        public PartialViewResult Menu(ECategory category) {
-
+        public PartialViewResult Menu(bool categoryOn = false, ECategory category = ECategory.OTHERS)
+        {
+            ViewBag.CategoryOn = categoryOn;
             ViewBag.SelectedCategory = category;
 
-            IEnumerable<ECategory> categories = repository.Products
-                                    .Select(x => x.Category)
-                                    .Distinct()
-                                    .OrderBy(x => x);
+            IEnumerable<ECategory> categories = repository.Products.Select(x => x.Category).Distinct().OrderBy(x => x);
+            IEnumerable<string> categoryStrings = categories.Select(x => CategoryClass.CategoriesCN[(int)x]);
 
-            return PartialView(categories);
+            return PartialView(categoryStrings.ToList());
         }
     }
 }

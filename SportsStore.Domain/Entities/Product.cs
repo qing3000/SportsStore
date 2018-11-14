@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Web.Mvc;
 
 namespace SportsStore.Domain.Entities
@@ -152,5 +153,12 @@ namespace SportsStore.Domain.Entities
             PriceInfo[] prices = (PriceInfo[])binaryFormatter.Deserialize(priceStream);
             return prices;
         }
+
+        public Tuple<decimal, decimal> GetMinMaxPriceCN()
+        {
+            PriceInfo[] priceInfos = GetPriceInfos();
+            IEnumerable<decimal> prices = priceInfos.Select(x => x.PriceCN);
+            return new Tuple<decimal, decimal>(prices.Min(), prices.Max());
+        } 
     }
 }

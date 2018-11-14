@@ -9,6 +9,11 @@ namespace SportsStore.Domain.Entities
 {
     public class Translator
     {
+        public static string ManualTranslate(string sentence)
+        {
+            return Translate(sentence);
+        }
+
         public static string Translate(string sentence, bool language = false)
         {
             string from_language = @"en";

@@ -2,6 +2,7 @@
 @{
     var imageLinks = Model.ImageLinks.Split(';');
     int imageCount = imageLinks.Count();
+    var prices = Model.GetPriceInfos();
 }
 
 <div style="width: 40%;float:left;margin-right:10px;">
@@ -52,14 +53,16 @@
     </div>
 </div>
 <div>
-    <h3>@Model.TitleCN</h3>
-    <h4>@Model.Brand</h4>
-    <h4>@Model.DescriptionCN</h4>
-    <h4>@Model.SizePrices.ToString("c")</h4>
-
+    @*<h4>@Model.SizePrices.ToString("c")</h4>*@
     @using (Html.BeginForm("AddToCart", "Cart"))
     {
-        @Html.HiddenFor(x => x.ProductID)
+        <h3>@Model.TitleCN</h3>
+        <h4>品牌：@Model.Brand</h4>
+        <h4>产品号：@Model.ProductID</h4>
+        <h4>简介：@Model.DescriptionCN</h4>
+        <h4>材质：@Model.MaterialCN</h4>
+        @Html.DropDownList("sizeSelection", (IEnumerable<SelectListItem>)ViewBag.sizeSelectList, "尺寸", new { @class = "form-control" })
+        @Html.HiddenFor(x => x.ID)
         @Html.Hidden("returnUrl", Request.Url.PathAndQuery)
         <input type="submit" value="+ 添加到购物车" />
     }

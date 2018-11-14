@@ -20,21 +20,22 @@ namespace SportsStore.WebUI.Controllers {
             this.repository = productRepository;
         }
 
-        public ViewResult List(bool listall, ECategory category, int page = 1)
+        public ViewResult List(bool categoryOn = false, ECategory category = ECategory.OTHERS, int page = 1)
         {
             ProductsListViewModel viewModel = new ProductsListViewModel {
                 Products = repository.Products
-                    .Where(p => listall == true || p.Category == category)
+                    .Where(p => categoryOn == false || p.Category == category)
                     .OrderBy(p => p.ProductID)
                     .Skip((page - 1) * PageSize)
                     .Take(PageSize),
                 PagingInfo = new PagingInfo {
                     CurrentPage = page,
                     ItemsPerPage = PageSize,
-                    TotalItems = listall == true ?
+                    TotalItems = categoryOn == false ?
                         repository.Products.Count() :
                         repository.Products.Where(e => e.Category == category).Count()
                 },
+                CategoryOn = categoryOn,
                 CurrentCategory = category
             };
             return View(viewModel);
@@ -43,6 +44,17 @@ namespace SportsStore.WebUI.Controllers {
         public ViewResult ProductDetails(int ID)
         {
             Product product = repository.Products.FirstOrDefault(p => p.ID == ID);
+            // Prepare the gender dropdown list. 
+            ViewBag.sizeSelectList = new List<SelectListItem>();
+            PriceInfo[] prices = product.GetPriceInfos();
+            for (int i = 0; i < prices.Length; i++)
+            {
+                string sizeStringCN = Translator.ManualTranslate(prices[i].Size);
+                string stockStringCN = Translator.ManualTranslate(prices[i].Stock);
+                string text = string.Format(@"{0,5}{1,6}{2,10}", sizeStringCN, prices[i].PriceCN, stockStringCN);
+                ViewBag.sizeSelectList.Add(new SelectListItem() { Text = text, Value = i.ToString() });
+            }
+
             return View(product);
         }
 
