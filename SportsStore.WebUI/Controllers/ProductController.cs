@@ -51,7 +51,7 @@ namespace SportsStore.WebUI.Controllers {
             {
                 string sizeStringCN = Translator.ManualTranslate(prices[i].Size);
                 string stockStringCN = Translator.ManualTranslate(prices[i].Stock);
-                string text = string.Format(@"{0,5}{1,6}{2,10}", sizeStringCN, prices[i].PriceCN, stockStringCN);
+                string text = string.Format(@"{0,5}  {1,6}元  {2,10}", sizeStringCN, prices[i].PriceCN, stockStringCN);
                 ViewBag.sizeSelectList.Add(new SelectListItem() { Text = text, Value = i.ToString() });
             }
 

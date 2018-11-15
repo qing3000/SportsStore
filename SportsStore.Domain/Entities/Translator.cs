@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Net;
-using System.Web;
+using System.Text.RegularExpressions;
+
 
 namespace SportsStore.Domain.Entities
 {
@@ -11,7 +9,17 @@ namespace SportsStore.Domain.Entities
     {
         public static string ManualTranslate(string sentence)
         {
-            return Translate(sentence);
+            string ret;
+            if (Regex.IsMatch(sentence, @"\d*-\d*y"))
+            {
+                ret = sentence.Substring(0, sentence.Length - 1) + @"岁";
+            }
+            else
+            {
+                ret = Translate(sentence);
+            }
+
+            return ret;
         }
 
         public static string Translate(string sentence, bool language = false)

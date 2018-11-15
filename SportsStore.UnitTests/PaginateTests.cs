@@ -141,7 +141,7 @@ namespace SportsStore.UnitTests
             NavController target = new NavController(mock.Object);
 
             // Act = get the set of categories 
-            ECategory[] results = ((IEnumerable<ECategory>)target.Menu(true, ECategory.BIBS).Model).ToArray();
+            ECategory[] results = ((IEnumerable<ECategory>)target.Menu(categoryOn : true, category : ECategory.BIBS).Model).ToArray();
 
             // Assert
             Assert.AreEqual(results.Length, 3);
@@ -168,7 +168,7 @@ namespace SportsStore.UnitTests
             ECategory categoryToSelect = ECategory.BIBS;
 
             // Action
-            string result = target.Menu(true, categoryToSelect).ViewBag.SelectedCategory;
+            string result = target.Menu(categoryOn : true, category : categoryToSelect).ViewBag.SelectedCategory;
 
             // Assert
             Assert.AreEqual(categoryToSelect, result);

@@ -11,7 +11,32 @@ namespace SportsStore.Domain.Entities
     {
         MALE,
         FEMALE,
-        NEUTRAL
+        UNISEX
+    }
+
+    public enum EBrand
+    {
+        BODEN,
+        NEXT,
+        UNKNOWN
+    }
+
+    public enum EColorSeries
+    {
+        RED,
+        GREEN,
+        BLUE,
+        ANY
+    }
+
+    public class BrandClass
+    {
+        static public string[] Brands = new string[]
+        {
+            @"Boden",
+            @"Next",
+            @"Unknown"
+        };
     }
 
     public class GenderClass
@@ -20,7 +45,7 @@ namespace SportsStore.Domain.Entities
         {
             @"Boy",
             @"Girl",
-            @"Neutral"
+            @"Unisex"
         };
 
         static public string[] GendersCN = new string[]
@@ -30,6 +55,7 @@ namespace SportsStore.Domain.Entities
             @"中性"
         };
     }
+
     public enum ECategory
     {
         DRESSES,
