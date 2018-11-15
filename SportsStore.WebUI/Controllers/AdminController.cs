@@ -147,18 +147,10 @@ namespace SportsStore.WebUI.Controllers {
             // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
 
             // Prepare the gender dropdown list. 
-            ViewBag.genderSelectList = new List<SelectListItem>();
-            for (int i = 0; i < GenderClass.GendersCN.Length; i++)
-            {
-                ViewBag.genderSelectList.Add(new SelectListItem() { Text = GenderClass.GendersCN[i], Value = i.ToString() });
-            }
+            ViewBag.genderSelectList = GenderClass.Genders.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() });
 
             // Prepare the category dropdown list.
-            ViewBag.categorySelectList = new List<SelectListItem>();
-            for (int i = 0; i < CategoryClass.CategoriesCN.Length; i++)
-            {
-                ViewBag.categorySelectList.Add(new SelectListItem() { Text = CategoryClass.CategoriesCN[i], Value = i.ToString() });
-            }
+            ViewBag.categorySelectList = CategoryClass.Categories.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() }); 
 
             return View("EditProducts", products);
         }

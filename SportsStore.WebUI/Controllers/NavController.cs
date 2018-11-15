@@ -27,7 +27,7 @@ namespace SportsStore.WebUI.Controllers {
             ViewBag.SelectedCategory = category;
 
             IEnumerable<ECategory> categories = repository.Products.Select(x => x.Category).Distinct().OrderBy(x => x);
-            IEnumerable<string> categoryStrings = categories.Select(x => CategoryClass.CategoriesCN[(int)x]);
+            IEnumerable<string> categoryStrings = CategoryClass.Categories.Select(x => x.Value.Item2);
             NavFilterViewModel navViewModel = new NavFilterViewModel()
             {
                 Gender = gender,

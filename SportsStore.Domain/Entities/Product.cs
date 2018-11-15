@@ -26,34 +26,8 @@ namespace SportsStore.Domain.Entities
         RED,
         GREEN,
         BLUE,
+        OTHERS,
         ANY
-    }
-
-    public class BrandClass
-    {
-        static public string[] Brands = new string[]
-        {
-            @"Boden",
-            @"Next",
-            @"Unknown"
-        };
-    }
-
-    public class GenderClass
-    {
-        static public string[] Genders = new string[]
-        {
-            @"Boy",
-            @"Girl",
-            @"Unisex"
-        };
-
-        static public string[] GendersCN = new string[]
-        {
-            @"男孩",
-            @"女孩",
-            @"中性"
-        };
     }
 
     public enum ECategory
@@ -66,26 +40,48 @@ namespace SportsStore.Domain.Entities
         OTHERS
     };
 
+    public class BrandClass
+    {
+        static public Dictionary<EBrand, string> Brands = new Dictionary<EBrand, string>
+        {
+            { EBrand.BODEN, @"Boden" },
+            { EBrand.NEXT, @"Next" },
+            { EBrand.UNKNOWN, @"Unknown" }
+        };
+    }
+
+    public class GenderClass
+    {
+        static public Dictionary<EGender, Tuple<string, string>> Genders = new Dictionary <EGender, Tuple<string, string>>
+        {
+            { EGender.MALE, Tuple.Create(@"Boy", @"男孩") },
+            { EGender.MALE, Tuple.Create(@"Girl", @"女孩") },
+            { EGender.UNISEX, Tuple.Create(@"Unisex", @"中性") }
+        };
+    }
+
     public class CategoryClass
     {
-        static public string[] Categories = new string[]
+        static public Dictionary<ECategory, Tuple<string, string>> Categories = new Dictionary<ECategory, Tuple<string, string>>
         {
-            @"Dresses",
-            @"Shoes",
-            @"Socks",
-            @"Bibs",
-            @"T-Shirt",
-            @"Others"
+            { ECategory.DRESSES, Tuple.Create(@"Dresses", @"连衣裙") },
+            { ECategory.SHOES, Tuple.Create(@"Dresses", @"鞋") },
+            { ECategory.SOCKES, Tuple.Create(@"Dresses", @"袜子") },
+            { ECategory.BIBS, Tuple.Create(@"Dresses", @"围嘴") },
+            { ECategory.TSHIRTS, Tuple.Create(@"Dresses", @"T恤") },
+            { ECategory.OTHERS, Tuple.Create(@"Dresses", @"其他") },
         };
+    };
 
-        static public string[] CategoriesCN = new string[]
+    public class ColorSeriesClass
+    {
+        static public Dictionary<EColorSeries, Tuple<string, string>> ColorSeries = new Dictionary<EColorSeries, Tuple<string, string>>
         {
-            @"连衣裙",
-            @"鞋",
-            @"袜子",
-            @"围嘴",
-            @"T恤",
-            @"其他"
+            { EColorSeries.RED, Tuple.Create(@"Red color series", @"红色系") },
+            { EColorSeries.GREEN, Tuple.Create(@"Dresses", @"绿色系") },
+            { EColorSeries.BLUE, Tuple.Create(@"Dresses", @"蓝色系") },
+            { EColorSeries.OTHERS, Tuple.Create(@"Dresses", @"其他色系") },
+            { EColorSeries.ANY, Tuple.Create(@"Dresses", @"任意色系") },
         };
     };
 
