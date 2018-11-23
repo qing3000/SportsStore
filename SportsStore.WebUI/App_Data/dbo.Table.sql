@@ -10,6 +10,7 @@
 	[Material]			NVARCHAR (MAX)		NOT NULL,
 	[MaterialCN]		NVARCHAR (MAX)		NOT NULL,
     [Category]			INT					NOT NULL,
+	[Color]				INT					NOT NULL,	
     [SizePricesBinary]	VARBINARY(MAX)		NOT NULL,
 	[MinimumAge]		REAL				NOT NULL,
 	[MaximumAge]		REAL				NOT NULL,

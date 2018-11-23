@@ -40,5 +40,18 @@ namespace SportsStore.Domain.Entities.Tests
             Product product = Parser.ParseProduct(url);
             Assert.IsTrue(product.GetPriceInfos().Length > 0);
         }
+
+        [TestMethod()]
+        public void ParseNEXTPageTest()
+        {
+            IEnumerable<string> links = Parser.ParseNEXTPage("");
+        }
+
+        [TestMethod()]
+        public void ParseNEXTProductTest()
+        {
+            string url = "http://www.next.co.uk/g92236s7#322425";
+            Product product = Parser.ParseProduct(url);
+        }
     }
 }

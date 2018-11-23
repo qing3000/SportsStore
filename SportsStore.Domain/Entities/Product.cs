@@ -92,6 +92,14 @@ namespace SportsStore.Domain.Entities
         public decimal Price { get; set; }
         public decimal PriceCN { get; set; }
         public string Stock { get; set; }
+        public string TranslateSize()
+        {
+            return Translator.ManualTranslate(this.Size);
+        }
+        public string TranslateStock()
+        {
+            return Translator.ManualTranslate(this.Stock);
+        }
     }
 
     [Serializable]

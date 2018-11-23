@@ -4,12 +4,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Web;
+using System.Text.RegularExpressions;
 
 namespace SportsStore.Domain.Entities
 {
     public class Parser
     {
+        public static Decimal GBP2RMB(Decimal x)
+        {
+            Decimal PRICE_RMBRATE = 10;
+            Decimal PRICE_PROFIT = 50;
+            return PRICE_RMBRATE * x + PRICE_PROFIT;
+        }
+
         public static Product ParseProduct(string url)
         {
             Product product = null;
@@ -45,12 +52,12 @@ namespace SportsStore.Domain.Entities
         {
             IList<string> productURLs = new List<string>();
             HtmlNode rootNode = ReadHtml(url).DocumentNode;
-            HtmlNode mainNode = rootNode.SelectSingleNode(@"//div[contains(@class,""defaultView"")]");
-            HtmlNodeCollection productNodes = mainNode.SelectNodes(@"//div[@class=""Price""]");
+            HtmlNode mainNode = rootNode.SelectSingleNode(@"//form[@id=""result""]");
+            HtmlNodeCollection productNodes = mainNode.SelectNodes(@"//article[contains(@class, ""Item"") and contains(@class, ""Fashion"")]");
             foreach (HtmlNode node in productNodes)
             {
-                string productURL = node.ChildNodes["a"].Attributes["href"].Value;
-                productURLs.Add(productURL);
+                string productURL = node.SelectSingleNode(@".//a[@class=""TitleText""]").Attributes["href"].Value;
+                productURLs.Add(@"http:" + productURL);
             }
 
             return productURLs;
@@ -79,16 +86,16 @@ namespace SportsStore.Domain.Entities
 
         private static Product ParseNEXTProduct(string url)
         {
-            Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
+            string html = ReadHtmlByPhantomJS(url, @"c:\temp\load_page.js");
 
             // Write out to file for viewing.
             StreamWriter sw = new StreamWriter(@"c:\temp\tmp.html");
-            sw.Write(output.Item1);
+            sw.Write(html);
             sw.Close();
 
             // Prepare the product object.
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(output.Item1);
+            doc.LoadHtml(html);
             Product product = new Product();
             HtmlNode rootNode = doc.DocumentNode;
             product.Brand = @"Next";
@@ -97,64 +104,137 @@ namespace SportsStore.Domain.Entities
             HtmlNode currentNode = rootNode.SelectSingleNode(@"//div[@class=""Title""]");
             if (currentNode != null)
             {
-                string productTitle = currentNode.InnerText.Trim();
-                product.Title = Translator.Translate(productTitle);
+                product.Title = currentNode.InnerText.Trim();
+                product.TitleCN = Translator.Translate(product.Title);
             }
 
+            currentNode = rootNode.SelectSingleNode(@"//div[@class=""ItemNumber""]");
+            product.ProductID = currentNode.InnerText;
 
             // Parse the gender.
             HtmlNodeCollection currentNodes = rootNode.SelectNodes(@"//li[contains(@class,""Breadcrumb"")]");
             if (currentNodes != null)
             {
                 IEnumerable<string> breadCrumbs = currentNodes.Select(x => x.InnerText.Trim());
-                product.Gender = ParseNextGenderString(string.Join(@"\", breadCrumbs));
+                string fullCrumbString = string.Join(@"\", breadCrumbs);
+                product.Gender = ParseNextGenderString(fullCrumbString);
 
                 // Parse the category
-                product.Category = ParseNextCategoryString(breadCrumbs.ElementAt(1));
+                product.Category = ParseNextCategoryString(fullCrumbString);
             }
 
             // Parse the description
-            currentNode = rootNode.SelectSingleNode(@"//div[contains(@class,""StyleContent"")]");
+            currentNode = rootNode.SelectSingleNode(@"//div[@id='ToneOfVoice']");
             if (currentNode != null)
             {
-                string productDescription = currentNode.InnerText.Trim();
-                product.Description = Translator.Translate(productDescription);
+                product.Description = currentNode.InnerText.Trim();
+                product.DescriptionCN = Translator.Translate(product.Description);
+            }
+
+            // Parse the material.
+            currentNode = rootNode.SelectSingleNode(@"//div[@id='Composition']");
+            if (currentNode != null)
+            {
+                product.Material = currentNode.InnerText.Trim();
+                product.MaterialCN = Translator.Translate(product.Material);
             }
 
             // Parse the price
-            currentNode = rootNode.SelectSingleNode(@"//div[@class=""Price""]");
+            currentNode = rootNode.SelectSingleNode(@"//div[contains(@class, 'SizeSelector')]");
             if (currentNode != null)
             {
-                string priceString = currentNode.FirstChild.InnerText;
-                string singlePriceString = priceString.Contains(@"-") ? priceString.Split('-').LastOrDefault() : priceString;
-                string priceNumberString = new string(singlePriceString.Where(x => Char.IsDigit(x)).ToArray());
-                //product.SizePrices = Convert.ToDecimal(priceNumberString);
+                PriceInfo[] priceInfos = ParseNextPriceInfos(currentNode);
+                // Parse the age info
+                if (priceInfos.Length > 0)
+                {
+                    Tuple<Single, Single> firstAge = ParseNextAgeInfo(priceInfos.First().Size);
+                    Tuple<Single, Single> lastAge = ParseNextAgeInfo(priceInfos.Last().Size);
+                    product.MinimumAge = firstAge.Item1;
+                    product.MaximumAge = lastAge.Item2;
+                }
+
+                product.SetPriceInfos(priceInfos);
             }
 
             // Parse the image links
             HtmlNode imgLinksNode = rootNode.SelectSingleNode(@"//div[@class=""ThumbNailNavClip""]");
+            IList<string> imgLinks = new List<string>();
             if (imgLinksNode != null)
             {
-                IList<string> imgLinks = new List<string>();
-                if (imgLinksNode != null)
+                currentNode = imgLinksNode.ChildNodes["ul"];
+                if (currentNode != null)
                 {
-                    currentNode = imgLinksNode.ChildNodes["ul"];
-                    if (currentNode != null)
+                    foreach (HtmlNode node in currentNode.ChildNodes)
                     {
-                        foreach (HtmlNode node in currentNode.ChildNodes)
+                        HtmlNode aNode = node.SelectSingleNode(@"a");
+                        imgLinks.Add(aNode.Attributes["rel"].Value);
+                        if (product.ThumbnailLink == null)
                         {
-                            HtmlNode aNode = node.SelectSingleNode(@"a");
-                            imgLinks.Add(aNode.Attributes["rel"].Value);
-
+                            HtmlNode thumbnailNode = aNode.ChildNodes.FirstOrDefault();
+                            if (thumbnailNode != null)
+                            {
+                                product.ThumbnailLink = thumbnailNode.Attributes["src"].Value;
+                            }
                         }
                     }
                 }
-
-                product.ImageLinks = string.Join(@";", imgLinks);
-                product.ThumbnailLink = imgLinksNode.ChildNodes["ul"].FirstChild.SelectSingleNode(@"a").Attributes[@"href"].Value;
             }
 
+            product.ImageLinks = string.Join(@";", imgLinks);
+            product.InsertTime = DateTime.Now;
+            product.UpdateTime = DateTime.Now;
             return product;
+        }
+
+        private static Tuple<Single, Single> ParseNextAgeInfo(string ageString)
+        {
+            //Single minAge;
+            //Single maxAge;
+            //if (Regex.IsMatch(ageString, @"\d*-\d* Yrs"))
+
+            //int index = ageString.IndexOf(@"up to");
+            //if (index >= 0)
+            //{
+            //    minAge = 0;
+            //    string rightString = ageString.Substring(index + 6);
+            //    index = rightString.IndexOf('m');
+            //    if (index >= 0)
+            //    {
+            //        numbericString = rightString.
+            //    }
+
+            //    maxAge = AgeStringToDecimal(rightString);
+            //}
+
+            return new Tuple<Single, Single>(0, 0);
+        }
+
+        private static PriceInfo[] ParseNextPriceInfos(HtmlNode node)
+        {
+            HtmlNodeCollection nodes = node.SelectNodes(@".//li");
+            IList<PriceInfo> priceInfos = new List<PriceInfo>();
+            foreach (HtmlNode oneNode in nodes.Skip(1))
+            {
+                string[] ss = oneNode.InnerText.Split('-');
+                if (ss.Length >= 2)
+                {
+                    PriceInfo priceInfo = new PriceInfo();
+                    priceInfo.Size = ss[0];
+                    priceInfo.Price = Convert.ToDecimal(ss[1]);
+                    priceInfo.PriceCN = GBP2RMB(priceInfo.Price);
+                    if (ss.Length == 3)
+                    {
+                        priceInfo.Stock = ss[2];
+                    }
+                    else
+                    {
+                        priceInfo.Stock = @"In stock";
+                    }
+                    priceInfos.Add(priceInfo);
+                }
+            }
+
+            return priceInfos.ToArray();
         }
 
         private static Product ParseBodenProduct(string url)
@@ -254,12 +334,16 @@ namespace SportsStore.Domain.Entities
             WebClient client = new WebClient();
             // Add a user agent header in case the requested URI contains a query.
             // Do the translation
-            client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-            Stream data = client.OpenRead(url);
+            //client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+            //Stream data = client.OpenRead(url);
 
             HtmlDocument doc = new HtmlDocument();
-            doc.Load(data);
-            doc.Save(@"c:\temp\file.htm");
+            //doc.Load(data);
+
+            StreamReader sr = new StreamReader(@"c:\temp\1.html");
+            doc.Load(sr);
+            sr.Close();
+            //doc.Save(@"c:\temp\1.html");
             return doc;
         }
 
@@ -320,8 +404,6 @@ namespace SportsStore.Domain.Entities
         }
         private static PriceInfo[] ParsePriceInfoString(string infoString)
         {
-            Decimal PRICE_RMBRATE = 10;
-            Decimal PRICE_PROFIT = 50;
             IList<PriceInfo> priceInfos = new List<PriceInfo>();
             string[] lines = infoString.Split('\n');
             foreach (string oneline in lines)
@@ -329,7 +411,7 @@ namespace SportsStore.Domain.Entities
                 string[] ss = oneline.Split(',');
                 string priceNumberString = new string(ss[1].Where(x => Char.IsDigit(x) || x == '.').ToArray());
                 Decimal price = priceNumberString.Length > 0 ? Convert.ToDecimal(priceNumberString) : -1;
-                Decimal priceCN = PRICE_RMBRATE * price + PRICE_PROFIT;
+                Decimal priceCN = GBP2RMB(price); 
                 priceInfos.Add(new PriceInfo { Size = ss[0].Trim(), Price= price, PriceCN = priceCN, Stock = ss[2].Trim() });
             }
 

@@ -19,8 +19,8 @@
         var priceInfo = @line.Product.GetPriceInfos()[line.SizeSelection];
         <tr>
             <td align="center">@line.Quantity</td>
-            <td align="left">@line.Product.Title</td>
-            <td align="left">@priceInfo.Size</td>
+            <td align="left">@line.Product.TitleCN</td>
+            <td align="left">@priceInfo.TranslateSize()</td>
             <td align="right">@priceInfo.PriceCN.ToString()</td>
             <td align="right">@((line.Quantity * priceInfo.PriceCN).ToString())</td>
             <td>
