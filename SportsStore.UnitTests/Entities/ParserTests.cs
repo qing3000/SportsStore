@@ -52,6 +52,7 @@ namespace SportsStore.Domain.Entities.Tests
         {
             string url = "http://www.next.co.uk/g92236s7#322425";
             Product product = Parser.ParseProduct(url);
+            Assert.AreNotEqual(null, product.ThumbnailLink);
         }
     }
 }

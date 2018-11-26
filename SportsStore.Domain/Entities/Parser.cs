@@ -86,12 +86,7 @@ namespace SportsStore.Domain.Entities
 
         private static Product ParseNEXTProduct(string url)
         {
-            string html = ReadHtmlByPhantomJS(url, @"c:\temp\load_page.js");
-
-            // Write out to file for viewing.
-            StreamWriter sw = new StreamWriter(@"c:\temp\tmp.html");
-            sw.Write(html);
-            sw.Close();
+            string html = ReadHtmlByPhantomJS(url, @"load_next_product.js");
 
             // Prepare the product object.
             HtmlDocument doc = new HtmlDocument();
@@ -354,21 +349,23 @@ namespace SportsStore.Domain.Entities
             //string ss2 = WebUtility.UrlEncode(url.Substring(urlSplit));
             //string uri = ss1 + ss2;
 
-            string filepath = @"c:\Temp\";
-            string jsFile = filepath + @"temp.js";
+            string jsFile = @"temp.js";
+            string outputFile = @"temp.html";
 
             StreamReader sr = new StreamReader(jsLoadPage);
             string ss = sr.ReadToEnd();
             sr.Close();
 
             StreamWriter sw = new StreamWriter(jsFile);
-            sw.Write(ss.Replace(@"URL", url));
+            sw.Write(ss.Replace(@"URL", url).Replace(@"OUTPUT_FILE", outputFile.Replace(@"\", @"/")));
             sw.Close();
 
-            string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
+            RunProcess(@"phantomjs.exe", jsFile);
 
-            // Extract the page content.
-            string pageContent = ExtractString(output, @"---START OF PAGE---", @"---END OF PAGE---");
+            sr = new StreamReader(outputFile);
+            string pageContent = sr.ReadToEnd();
+            sr.Close();
+
             return pageContent;
         }
 
@@ -385,7 +382,7 @@ namespace SportsStore.Domain.Entities
             sw.Write(ss.Replace(@"URL", url));
             sw.Close();
 
-            string output = RunProcess(filepath + @"phantomjs.exe", jsFile);
+            string output = RunProcess(filepath + @"phantomjs.exe", jsFile.Replace(@"\", @"/"));
 
             // Extract the page content.
 
