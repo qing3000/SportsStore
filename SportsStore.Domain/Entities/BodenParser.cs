@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.UI;
 
 namespace SportsStore.Domain.Entities
 {
@@ -13,13 +18,13 @@ namespace SportsStore.Domain.Entities
     {
         public IEnumerable<string> ParseBodenProductList(string url)
         {
-            IWebDriver driver = this.LoadWebPage(url);
+            this.LoadWebPage(url);
 
             string rootUrl = @"http://www.boden.co.uk";
             IList<string> productURLs = new List<string>();
 
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(driver.PageSource);
+            doc.LoadHtml(this.driver.PageSource);
             HtmlNode rootNode = doc.DocumentNode;
 
             HtmlNode mainNode = rootNode.SelectSingleNode(@"//div[contains(@class,""product-items"")]");
@@ -36,12 +41,11 @@ namespace SportsStore.Domain.Entities
 
         public Product ParseBodenProduct(string url)
         {
-            IWebDriver driver = this.LoadWebPage(url);
-            // Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
+            this.LoadWebPage(url);
 
             // Prepare the product object.
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(driver.PageSource);
+            doc.LoadHtml(this.driver.PageSource);
             Product product = new Product();
             product.URL = url;
             HtmlNode rootNode = doc.DocumentNode;
@@ -100,9 +104,6 @@ namespace SportsStore.Domain.Entities
                 }
             }
 
-            // Get the prices.
-            //product.SetPriceInfos(output.Item2);
-
             // Parse the image links
             HtmlNode imgContainerNode = rootNode.SelectSingleNode(@"//div[@class=""imageryImagesContainer""]");
             if (imgContainerNode != null)
@@ -120,7 +121,68 @@ namespace SportsStore.Domain.Entities
 
             product.InsertTime = DateTime.Now;
             product.UpdateTime = DateTime.Now;
+
+            product.SetPriceInfos(ParseBodenPrices(this.driver, this.wait));
+
             return product;
+        }
+
+        private static PriceInfo[] ParseBodenPrices(IWebDriver driver, IWait<IWebDriver> wait)
+        {
+            IList<PriceInfo> priceInfos = new List<PriceInfo>();
+            ReadOnlyCollection<IWebElement> sizeList = driver.FindElement(By.Id("pdpBuyingPanel_SizeChart")).FindElements(By.CssSelector("*"));
+            if (sizeList.Count > 0)
+            {
+                foreach (IWebElement sizeItem in sizeList)
+                {
+                    ReadOnlyCollection<IWebElement> anchors = sizeItem.FindElements(By.TagName("a"));
+                    if (anchors.Count > 0)
+                    {
+                        IWebElement sizeButton = anchors[0];
+                        string sizeString = sizeButton.Text;
+
+                        try
+                        {
+                            // With a small window, the element might not come into view. In theory we should move to the element then click.
+                            // However, Actions does not seem to work in this case.
+                            //Actions actions = new Actions(driver);
+                            //actions.MoveToElement(sizeButton).Click().Perform();
+
+                            // Altenatively, we start with a large enough screen and then Click() function should work. But this is not ideal.
+                            //sizeButton.Click();
+
+                            // Executing a javascript seems to work well regardless of screen size.
+                            IJavaScriptExecutor ex = (IJavaScriptExecutor)driver;
+                            ex.ExecuteScript("arguments[0].click();", sizeButton);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("exception: {0}", e);
+                            continue;
+                        }
+
+                        wait.Until(x => (string)((IJavaScriptExecutor)x).ExecuteScript("return document.readyState") == "complete");
+                        IWebElement priceElement = driver.FindElements(By.ClassName("pdpAddToBagPrice")).First();
+                        string priceString = priceElement.Text;
+                        ReadOnlyCollection<IWebElement> stockElements = driver.FindElements(By.ClassName("pdpStockAvailability")).First().FindElements(By.CssSelector("*"));
+                        string stockString = "Unknown";
+                        foreach (IWebElement stockElement in stockElements)
+                        {
+                            string className = stockElement.GetAttribute("class");
+                            if (!className.Contains("ng-hide") || className.Contains("ng-hide-remove"))
+                            {
+                                stockString = stockElement.Text;
+                            }
+                        }
+
+                        string priceNumberString = new string(priceString.Where(x => Char.IsDigit(x) || x == '.').ToArray());
+                        Decimal price = priceNumberString.Length > 0 ? Convert.ToDecimal(priceNumberString) : -1;
+                        priceInfos.Add(new PriceInfo { Size = sizeString.Trim(), Price = price, PriceCN = GBP2RMB(price), Stock = stockString.Trim() });
+                    }
+                }
+            }
+
+            return priceInfos.ToArray();
         }
 
         private static EGender ParseBodenGenderString(string genderString)

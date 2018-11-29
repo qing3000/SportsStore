@@ -13,14 +13,14 @@ namespace SportsStore.Domain.Entities
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            IWebDriver driver = this.LoadScrollableWebPage(url);
+            this.LoadScrollableWebPage(url);
             stopwatch.Stop();
             Console.WriteLine("Time consumed in loading webpage = {0}", stopwatch.Elapsed);
 
             stopwatch.Restart();
             IList<string> productURLs = new List<string>();
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(driver.PageSource);
+            doc.LoadHtml(this.driver.PageSource);
             HtmlNode rootNode = doc.DocumentNode;
             HtmlNode mainNode = rootNode.SelectSingleNode(@"//form[@id=""result""]");
             HtmlNodeCollection productNodes = mainNode.SelectNodes(@"//article[contains(@class, ""Item"") and contains(@class, ""Fashion"")]");
@@ -39,14 +39,14 @@ namespace SportsStore.Domain.Entities
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            IWebDriver driver = this.LoadWebPage(url);
+            this.LoadWebPage(url);
             stopwatch.Stop();
             Console.WriteLine("Time consumed in loading webpage = {0}", stopwatch.Elapsed);
 
             // Prepare the product object.
             stopwatch.Restart();
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(driver.PageSource);
+            doc.LoadHtml(this.driver.PageSource);
             Product product = new Product();
             product.URL = url;
             HtmlNode rootNode = doc.DocumentNode;
