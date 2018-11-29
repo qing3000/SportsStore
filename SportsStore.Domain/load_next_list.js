@@ -24,6 +24,8 @@ page.open('https://www.next.co.uk/shop/gender-newborngirls-gender-oldergirls-gen
         {
             var count = document.getElementsByClassName('Item Fashion').length;
             console.log(count + ' items loaded');
+            console.log('Previously ' + document.body.scrollTop + ' pixels scrolled');
+            console.log('To be scrolled by ' + document.body.scrollHeight + ' pixels');
             document.body.scrollTop = document.body.scrollHeight;
             return count;
         });

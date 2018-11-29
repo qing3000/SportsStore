@@ -62,10 +62,18 @@ namespace SportsStore.WebUI.Controllers {
         {
             Product product = new Product();
             product.ID = 0;
-            product.URL = productURL;
             if (productURL != null)
             {
-                Product tempProduct = Parser.ParseProduct(productURL);
+                Product tempProduct = null;
+                if (productURL.ToLower().Contains("next"))
+                {
+                    tempProduct = NextParser.ParseNextProduct(productURL);
+                }
+                else if (productURL.ToLower().Contains("boden"))
+                {
+                    tempProduct = BodenParser.ParseBodenProduct(productURL);
+                }
+
                 if (tempProduct != null)
                 {
                     product = tempProduct;
@@ -127,16 +135,34 @@ namespace SportsStore.WebUI.Controllers {
         public ViewResult ParseMultiple(string url)
         {
             IList<Product> products = new List<Product>();
-            IEnumerable<string> productURLs = Parser.ParsePage(url);
+
+            IEnumerable<string> productURLs = null;
+            if (url.ToLower().Contains("next"))
+            {
+                productURLs = NextParser.ParseNextProductList(url);
+            }
+            else if (url.ToLower().Contains("boden"))
+            {
+                productURLs = BodenParser.ParseBodenProductList(url);
+            }
+
             // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
             // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
             for (int i = 0; i < productURLs.Count(); i++)
             {
                 string productURL = productURLs.ElementAt(i);
-                Product product = Parser.ParseProduct(productURL);
+                Product product = null;
+                if (url.ToLower().Contains("next"))
+                {
+                    product = NextParser.ParseNextProduct(productURL);
+                }
+                else if (url.ToLower().Contains("boden"))
+                {
+                    product = BodenParser.ParseBodenProduct(url);
+                }
+
                 if (product != null)
                 {
-                    product.URL = productURL;
                     products.Add(product);
                 }
 
