@@ -11,9 +11,9 @@ namespace SportsStore.Domain.Entities
 {
     public class BodenParser : Parser
     {
-        public static IEnumerable<string> ParseBodenProductList(string url)
+        public IEnumerable<string> ParseBodenProductList(string url)
         {
-            IWebDriver driver = LoadWebPage(url);
+            IWebDriver driver = this.LoadWebPage(url);
 
             string rootUrl = @"http://www.boden.co.uk";
             IList<string> productURLs = new List<string>();
@@ -34,9 +34,9 @@ namespace SportsStore.Domain.Entities
             return productURLs;
         }
 
-        public static Product ParseBodenProduct(string url)
+        public Product ParseBodenProduct(string url)
         {
-            IWebDriver driver = LoadWebPage(url);
+            IWebDriver driver = this.LoadWebPage(url);
             // Tuple<string, PriceInfo[]> output = ParseHtmlByPhantomJS(url, @"c:\temp\parse_boden_page.js");
 
             // Prepare the product object.

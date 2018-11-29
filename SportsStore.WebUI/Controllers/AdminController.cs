@@ -16,10 +16,14 @@ namespace SportsStore.WebUI.Controllers {
     public class AdminController : Controller
     {
         private IProductRepository repository;
+        private NextParser nextParser;
+        private BodenParser bodenParser;
 
         public AdminController(IProductRepository repo)
         {
             repository = repo;
+            nextParser = new NextParser();
+            bodenParser = new BodenParser();
         }
 
         public ViewResult Index()
@@ -67,11 +71,11 @@ namespace SportsStore.WebUI.Controllers {
                 Product tempProduct = null;
                 if (productURL.ToLower().Contains("next"))
                 {
-                    tempProduct = NextParser.ParseNextProduct(productURL);
+                    tempProduct = this.nextParser.ParseNextProduct(productURL);
                 }
                 else if (productURL.ToLower().Contains("boden"))
                 {
-                    tempProduct = BodenParser.ParseBodenProduct(productURL);
+                    tempProduct = this.bodenParser.ParseBodenProduct(productURL);
                 }
 
                 if (tempProduct != null)
@@ -139,11 +143,11 @@ namespace SportsStore.WebUI.Controllers {
             IEnumerable<string> productURLs = null;
             if (url.ToLower().Contains("next"))
             {
-                productURLs = NextParser.ParseNextProductList(url);
+                productURLs = this.nextParser.ParseNextProductList(url);
             }
             else if (url.ToLower().Contains("boden"))
             {
-                productURLs = BodenParser.ParseBodenProductList(url);
+                productURLs = this.bodenParser.ParseBodenProductList(url);
             }
 
             // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
@@ -154,11 +158,11 @@ namespace SportsStore.WebUI.Controllers {
                 Product product = null;
                 if (url.ToLower().Contains("next"))
                 {
-                    product = NextParser.ParseNextProduct(productURL);
+                    product = this.nextParser.ParseNextProduct(productURL);
                 }
                 else if (url.ToLower().Contains("boden"))
                 {
-                    product = BodenParser.ParseBodenProduct(url);
+                    product = this.bodenParser.ParseBodenProduct(url);
                 }
 
                 if (product != null)

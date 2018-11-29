@@ -8,11 +8,32 @@ using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System.Diagnostics;
 
 namespace SportsStore.Domain.Entities
 {
     public class Parser
     {
+        private IWebDriver driver;
+        private IWait<IWebDriver> wait;
+        const double TIMEOUT_SECONDS = 2.0;
+        const double POLLING_INTERVAL_MILLISECONDS = 1.0;
+        public Parser()
+        {
+
+            // Create a headless Google Chrome browser (no need to load images).
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument(@"--headless");
+            options.AddArgument("disable-infobars");
+            options.AddArgument("--disable-extensions");
+            options.AddArgument("--blink-settings=imagesEnabled=false");
+
+            // Go to the website
+            this.driver = new ChromeDriver(options);
+            this.wait = new WebDriverWait(driver, TimeSpan.FromSeconds(TIMEOUT_SECONDS));
+            this.wait.PollingInterval = TimeSpan.FromMilliseconds(POLLING_INTERVAL_MILLISECONDS);
+        }
+
         private static void SaveHtmlNode(HtmlNode node)
         {
             HtmlDocument doc = new HtmlDocument();
@@ -52,51 +73,32 @@ namespace SportsStore.Domain.Entities
             return ajaxLoaded;
         }
 
-        static IWebDriver CreateWebDriver()
+        public IWebDriver LoadWebPage(string url)
         {
-            // Create a headless Google Chrome browser (no need to load images).
-            ChromeOptions options = new ChromeOptions();
-            options.AddArgument(@"--headless");
-            options.AddArgument("disable-infobars");
-            options.AddArgument("--disable-extensions");
-            options.AddArgument("--blink-settings=imagesEnabled=false");
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             // Go to the website
-            IWebDriver driver = new ChromeDriver(options);
-            return driver;
-        }
+            this.driver.Navigate().GoToUrl(url);
+            stopwatch.Stop();
+            Console.WriteLine("Time consumed in goto url = {0}", stopwatch.Elapsed);
 
-        static public IWebDriver LoadWebPage(string url)
-        {
-            // Create the web driver.
-            IWebDriver driver = CreateWebDriver();
-
-            // Go to the website
-            driver.Navigate().GoToUrl(url);
-
+            stopwatch.Restart();
             // Load the webpage and wait for the AJAX and Javascript to finish loading.
-            IWait<IWebDriver> wait = new WebDriverWait(driver, TimeSpan.FromSeconds(2));
-            wait.PollingInterval = TimeSpan.FromMilliseconds(1);
-            WaitAjaxToLoad(driver, wait);
-            wait.Until(x => (string)((IJavaScriptExecutor)x).ExecuteScript("return document.readyState") == "complete");
+            WaitAjaxToLoad(this.driver, this.wait);
+            this.wait.Until(x => (string)((IJavaScriptExecutor)x).ExecuteScript("return document.readyState") == "complete");
+            stopwatch.Stop();
+            Console.WriteLine("Time consumed in waiting for page to load = {0}", stopwatch.Elapsed);
 
             return driver;
         }
 
-        static public IWebDriver LoadScrollableWebPage(string url)
+        public IWebDriver LoadScrollableWebPage(string url)
         {
-            // Create the web driver.
-            IWebDriver driver = CreateWebDriver();
-
             // Go to the website
-            driver.Navigate().GoToUrl(url);
-
-            // Scroll the page to the bottom and until no more need content can be loaded.
-            IWait<IWebDriver> wait = new WebDriverWait(driver, TimeSpan.FromSeconds(2));
-            wait.PollingInterval = TimeSpan.FromMilliseconds(1); ;
+            this.driver.Navigate().GoToUrl(url);
             do
             {
-                ((IJavaScriptExecutor)driver).ExecuteScript(@"window.scrollTo(0, document.body.scrollHeight);");
+                ((IJavaScriptExecutor)this.driver).ExecuteScript(@"window.scrollTo(0, document.body.scrollHeight);");
             } while (WaitAjaxToLoad(driver, wait));
 
             return driver;

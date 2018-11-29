@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HtmlAgilityPack;
 using OpenQA.Selenium;
 
@@ -11,11 +9,11 @@ namespace SportsStore.Domain.Entities
 {
     public class NextParser : Parser
     {
-        static public IList<string> ParseNextProductList(string url)
+        public IList<string> ParseNextProductList(string url)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            IWebDriver driver = LoadScrollableWebPage(url);
+            IWebDriver driver = this.LoadScrollableWebPage(url);
             stopwatch.Stop();
             Console.WriteLine("Time consumed in loading webpage = {0}", stopwatch.Elapsed);
 
@@ -32,16 +30,21 @@ namespace SportsStore.Domain.Entities
                 productURLs.Add(@"http:" + productURL);
             }
             stopwatch.Stop();
-            Console.WriteLine("Time consumed in finding result element = {0}", stopwatch.Elapsed);
+            Console.WriteLine("Time consumed in parsing the content {0}", stopwatch.Elapsed);
 
             return productURLs;
         }
 
-        public static Product ParseNextProduct(string url)
+        public Product ParseNextProduct(string url)
         {
-            IWebDriver driver = LoadWebPage(url);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            IWebDriver driver = this.LoadWebPage(url);
+            stopwatch.Stop();
+            Console.WriteLine("Time consumed in loading webpage = {0}", stopwatch.Elapsed);
 
             // Prepare the product object.
+            stopwatch.Restart();
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(driver.PageSource);
             Product product = new Product();
@@ -132,6 +135,9 @@ namespace SportsStore.Domain.Entities
             product.ImageLinks = string.Join(@";", imgLinks);
             product.InsertTime = DateTime.Now;
             product.UpdateTime = DateTime.Now;
+
+            stopwatch.Stop();
+            Console.WriteLine("Time consumed in parsing the content {0}", stopwatch.Elapsed);
             return product;
         }
 

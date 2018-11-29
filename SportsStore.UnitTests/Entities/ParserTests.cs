@@ -22,37 +22,41 @@ namespace SportsStore.Domain.Entities.Tests
         [TestMethod()]
         public void ParseBodenPageTest()
         {
+            BodenParser bodenParser = new BodenParser();
             Console.WriteLine(@"Parsing page");
-            IEnumerable<string> links = BodenParser.ParseBodenProductList("http://www.boden.co.uk/en-gb/girls-dresses");
+            IEnumerable<string> links = bodenParser.ParseBodenProductList("http://www.boden.co.uk/en-gb/girls-dresses");
             Assert.AreEqual(90, links.Count());
             IList<Product> products = new List<Product>();
             foreach (string link in links)
             {
                 Console.WriteLine(@"Processing link {0}", link);
-                products.Add(BodenParser.ParseBodenProduct(link));
+                products.Add(bodenParser.ParseBodenProduct(link));
             }
         }
 
         [TestMethod()]
         public void ParseBodenProductTest()
         {
+            BodenParser bodenParser = new BodenParser();
             string url = "http://www.boden.co.uk/en-gb/girls-dresses/knitted-dresses/g1095-red/girls-polish-red-snowmen-fair-isle-knitted-dress";
-            Product product = BodenParser.ParseBodenProduct(url);
+            Product product = bodenParser.ParseBodenProduct(url);
             Assert.IsTrue(product.GetPriceInfos().Length > 0);
         }
 
         [TestMethod()]
         public void ParseNextListTest()
         {
-            IEnumerable<string> links = NextParser.ParseNextProductList("https://www.next.co.uk/shop/gender-newborngirls-gender-oldergirls-gender-youngergirls-category-dresses");
+            NextParser nextParser = new NextParser();
+            IEnumerable<string> links = nextParser.ParseNextProductList("https://www.next.co.uk/shop/gender-newborngirls-gender-oldergirls-gender-youngergirls-category-dresses");
             Assert.IsTrue(links.Count() > 650);
         }
 
         [TestMethod()]
         public void ParseNextProductTest()
         {
+            NextParser nextParser = new NextParser();
             string url = "http://www.next.co.uk/g92236s7#322425";
-            Product product = NextParser.ParseNextProduct(url);
+            Product product = nextParser.ParseNextProduct(url);
             Assert.AreNotEqual(null, product.ThumbnailLink);
         }
     }
