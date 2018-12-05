@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using OpenQA.Selenium;
 
@@ -143,25 +144,20 @@ namespace SportsStore.Domain.Entities
 
         private static Tuple<Single, Single> ParseNextAgeInfo(string ageString)
         {
-            //Single minAge;
-            //Single maxAge;
-            //if (Regex.IsMatch(ageString, @"\d*-\d* Yrs"))
-
-            //int index = ageString.IndexOf(@"up to");
-            //if (index >= 0)
-            //{
-            //    minAge = 0;
-            //    string rightString = ageString.Substring(index + 6);
-            //    index = rightString.IndexOf('m');
-            //    if (index >= 0)
-            //    {
-            //        numbericString = rightString.
-            //    }
-
-            //    maxAge = AgeStringToDecimal(rightString);
-            //}
-
-            return new Tuple<Single, Single>(0, 0);
+            Single minAge;
+            Single maxAge;
+            if (Regex.IsMatch(ageString, @"\d+ Yrs"))
+            {
+                Match results = Regex.Match(ageString, @"(\d+) Yrs");
+                minAge = Convert.ToSingle(ageString.Split(' ')[0]);
+                maxAge = minAge;
+            }
+            else
+            {
+                minAge = 0;
+                maxAge = 0;
+            }
+            return new Tuple<Single, Single>(minAge, maxAge);
         }
 
         private static PriceInfo[] ParseNextPriceInfos(HtmlNode node)

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -122,7 +123,18 @@ namespace SportsStore.Domain.Entities
             product.InsertTime = DateTime.Now;
             product.UpdateTime = DateTime.Now;
 
-            product.SetPriceInfos(ParseBodenPrices(this.driver, this.wait));
+            PriceInfo[] priceInfos = ParseBodenPrices(this.driver, this.wait);
+            product.SetPriceInfos(priceInfos);
+
+            // Parse the age info
+            if (priceInfos.Length > 0)
+            {
+                Tuple<Single, Single> firstAge = ParseBodenAgeInfo(priceInfos.First().Size);
+                Tuple<Single, Single> lastAge = ParseBodenAgeInfo(priceInfos.Last().Size);
+                product.MinimumAge = firstAge.Item1;
+                product.MaximumAge = lastAge.Item2;
+            }
+
 
             return product;
         }
@@ -184,6 +196,25 @@ namespace SportsStore.Domain.Entities
 
             return priceInfos.ToArray();
         }
+
+        private static Tuple<Single, Single> ParseBodenAgeInfo(string ageString)
+        {
+            Single minAge;
+            Single maxAge;
+            if (Regex.IsMatch(ageString, @"\d+-\d+y"))
+            {
+                MatchCollection matches = Regex.Matches(ageString, @"(\d+)");
+                minAge = Convert.ToSingle(matches[0].Value);
+                maxAge = Convert.ToSingle(matches[1].Value);
+            }
+            else
+            {
+                minAge = 0;
+                maxAge = 0;
+            }
+            return new Tuple<Single, Single>(minAge, maxAge);
+        }
+
 
         private static EGender ParseBodenGenderString(string genderString)
         {
