@@ -50,6 +50,13 @@ namespace SportsStore.Domain.Entities.Tests
             NextParser nextParser = new NextParser();
             IEnumerable<string> links = nextParser.ParseNextProductList("https://www.next.co.uk/shop/gender-newborngirls-gender-oldergirls-gender-youngergirls-category-dresses");
             Assert.IsTrue(links.Count() > 650);
+
+            IList<Product> products = new List<Product>();
+            foreach (string link in links)
+            {
+                Console.WriteLine(@"Processing link {0}", link);
+                products.Add(nextParser.ParseNextProduct(link));
+            }
         }
 
         [TestMethod()]

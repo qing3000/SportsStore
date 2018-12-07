@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -43,6 +44,10 @@ namespace SportsStore.Domain.Entities
             this.LoadWebPage(url);
             stopwatch.Stop();
             Console.WriteLine("Time consumed in loading webpage = {0}", stopwatch.Elapsed);
+
+            StreamWriter sw = new StreamWriter("c:\\temp\\b.html");
+            sw.Write(this.driver.PageSource);
+            sw.Close();
 
             // Prepare the product object.
             stopwatch.Restart();
@@ -148,7 +153,6 @@ namespace SportsStore.Domain.Entities
             Single maxAge;
             if (Regex.IsMatch(ageString, @"\d+ Yrs"))
             {
-                Match results = Regex.Match(ageString, @"(\d+) Yrs");
                 minAge = Convert.ToSingle(ageString.Split(' ')[0]);
                 maxAge = minAge;
             }
@@ -166,13 +170,16 @@ namespace SportsStore.Domain.Entities
             IList<PriceInfo> priceInfos = new List<PriceInfo>();
             foreach (HtmlNode oneNode in nodes.Skip(1))
             {
-                string[] ss = oneNode.InnerText.Split('-');
-                if (ss.Length >= 2)
+                // MatchCollection matches = Regex.Matches(oneNode.InnerText.Trim(), @"(\d+)");
+                // Single minAge = Convert.ToSingle(matches[0].Value);
+                // Single maxAge = Convert.ToSingle(matches[1].Value);
+                string[] ss = oneNode.InnerText.Split(new[] { @" - " }, StringSplitOptions.None);
+                PriceInfo priceInfo = new PriceInfo();
+                if (ss.Length == 3)
                 {
-                    PriceInfo priceInfo = new PriceInfo();
                     priceInfo.Size = ss[0];
                     priceInfo.Price = Convert.ToDecimal(ss[1]);
-                    priceInfo.PriceCN = GBP2RMB(priceInfo.Price);
+
                     if (ss.Length == 3)
                     {
                         priceInfo.Stock = ss[2];
@@ -183,6 +190,24 @@ namespace SportsStore.Domain.Entities
                     }
                     priceInfos.Add(priceInfo);
                 }
+                else if (ss.Length == 2)
+                {
+                    priceInfo.Size = ss[0];
+                    priceInfo.Price = Convert.ToDecimal(ss[1]);
+                    //HtmlNode priceNode = node.SelectSingleNode(@".//div[@class=""NowPrice""");
+                    //priceInfo.Price = Convert.ToDecimal(priceNode.InnerText.Trim());
+                    priceInfo.Stock = ss[1];
+                }
+                else if (ss.Length == 1)
+                {
+                    priceInfo.Size = ss[0];
+                    HtmlNode priceNode = node.SelectSingleNode(@"//div[@class=""nowPrice""]");
+                    string priceString = priceNode.InnerText.Trim();
+                    priceInfo.Price = Convert.ToDecimal(new string(priceString.Where(x => Char.IsDigit(x)).ToArray()));
+                    priceInfo.Stock = @"In stock";
+                }
+
+                priceInfo.PriceCN = GBP2RMB(priceInfo.Price);
             }
 
             return priceInfos.ToArray();
