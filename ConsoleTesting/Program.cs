@@ -16,11 +16,11 @@ namespace ConsoleTesting
             IEnumerable<string> links = (Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"temp.bin"));
             Console.WriteLine(@"Total of {0} products found in the page", links.Count());
             IList<Product> products = new List<Product>();
-            foreach (string link in links.Skip(1))
+            foreach (string link in links.Take(10))
             {
                 Console.WriteLine(@"Processing link {0}", link);
                 products.Add(nextParser.ParseNextProduct(link));
-            }
+             }
         }
     }
 }

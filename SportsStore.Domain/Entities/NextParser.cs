@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using OpenQA.Selenium;
@@ -86,8 +87,21 @@ namespace SportsStore.Domain.Entities
             if (currentNode != null)
             {
                 product.Description = currentNode.InnerText.Trim();
-                product.DescriptionCN = Translator.Translate(product.Description);
             }
+            else
+            {
+                currentNodes = rootNode.SelectNodes(@"//div[@class='description']");
+                if (currentNodes != null)
+                {
+                    product.Description = WebUtility.HtmlDecode(string.Join(@" ", currentNodes.Select(x => x.InnerText)));
+                }
+                else
+                {
+                    product.Description = "";
+                }
+            }
+
+            product.DescriptionCN = Translator.Translate(product.Description);
 
             // Parse the material.
             currentNode = rootNode.SelectSingleNode(@"//div[@id='Composition']");
@@ -151,16 +165,36 @@ namespace SportsStore.Domain.Entities
         {
             Single minAge;
             Single maxAge;
-            if (Regex.IsMatch(ageString, @"\d+ Yrs"))
+            if (Regex.IsMatch(ageString, @"^\d+$"))
+            {
+                minAge = Convert.ToSingle(ageString);
+                maxAge = minAge;
+            }
+            else if (Regex.IsMatch(ageString, @"^\d+ Yrs$"))
             {
                 minAge = Convert.ToSingle(ageString.Split(' ')[0]);
                 maxAge = minAge;
+            }
+            else if (Regex.IsMatch(ageString, @"^\d+-\d+ Mths$"))
+            {
+                string dString = ageString.Split(' ')[0];
+                string[] dd = dString.Split('-');
+                minAge = Convert.ToSingle(dd[0]) / 12;
+                maxAge = Convert.ToSingle(dd[1]) / 12;
+            }
+            else if (Regex.IsMatch(ageString, @"^\d+-\d+ Yrs$"))
+            {
+                string dString = ageString.Split(' ')[0];
+                string[] dd = dString.Split('-');
+                minAge = Convert.ToSingle(dd[0]);
+                maxAge = Convert.ToSingle(dd[1]);
             }
             else
             {
                 minAge = 0;
                 maxAge = 0;
             }
+
             return new Tuple<Single, Single>(minAge, maxAge);
         }
 
@@ -175,39 +209,39 @@ namespace SportsStore.Domain.Entities
                 // Single maxAge = Convert.ToSingle(matches[1].Value);
                 string[] ss = oneNode.InnerText.Split(new[] { @" - " }, StringSplitOptions.None);
                 PriceInfo priceInfo = new PriceInfo();
-                if (ss.Length == 3)
+                if (ss.Length > 0)
                 {
                     priceInfo.Size = ss[0];
-                    priceInfo.Price = Convert.ToDecimal(ss[1]);
-
-                    if (ss.Length == 3)
+                    if (ss.Length >= 3)
                     {
+                        priceInfo.Price = Convert.ToDecimal(ss[1]);
                         priceInfo.Stock = ss[2];
                     }
                     else
                     {
-                        priceInfo.Stock = @"In stock";
+
+                        if (ss.Length == 2)
+                        {
+                            decimal price = 0;
+                            if (!Decimal.TryParse(ss[1], out price))
+                            {
+                                // Get the price from another html node.
+                                HtmlNode priceNode = node.SelectSingleNode(@"//div[@class=""nowPrice""]");
+                                string priceString = priceNode.InnerText.Trim();
+                                priceInfo.Price = Convert.ToDecimal(new string(priceString.Where(x => Char.IsDigit(x)).ToArray()));
+                                priceInfo.Stock = ss[1];
+                            }
+                            else
+                            {
+                                priceInfo.Price = price;
+                                priceInfo.Stock = @"In stock";
+                            }
+                        }
                     }
+
+                    priceInfo.PriceCN = GBP2RMB(priceInfo.Price);
                     priceInfos.Add(priceInfo);
                 }
-                else if (ss.Length == 2)
-                {
-                    priceInfo.Size = ss[0];
-                    priceInfo.Price = Convert.ToDecimal(ss[1]);
-                    //HtmlNode priceNode = node.SelectSingleNode(@".//div[@class=""NowPrice""");
-                    //priceInfo.Price = Convert.ToDecimal(priceNode.InnerText.Trim());
-                    priceInfo.Stock = ss[1];
-                }
-                else if (ss.Length == 1)
-                {
-                    priceInfo.Size = ss[0];
-                    HtmlNode priceNode = node.SelectSingleNode(@"//div[@class=""nowPrice""]");
-                    string priceString = priceNode.InnerText.Trim();
-                    priceInfo.Price = Convert.ToDecimal(new string(priceString.Where(x => Char.IsDigit(x)).ToArray()));
-                    priceInfo.Stock = @"In stock";
-                }
-
-                priceInfo.PriceCN = GBP2RMB(priceInfo.Price);
             }
 
             return priceInfos.ToArray();
@@ -215,7 +249,8 @@ namespace SportsStore.Domain.Entities
 
         private static EGender ParseNextGenderString(string genderString)
         {
-            return genderString.ToLower().Contains("girl") ? EGender.FEMALE : EGender.MALE;
+            string ls = genderString.ToLower();
+            return ls.Contains("girl") || ls.Contains("dress") ? EGender.FEMALE : EGender.MALE;
         }
 
         private static ECategory ParseNextCategoryString(string categoryString)

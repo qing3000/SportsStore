@@ -7,6 +7,13 @@ namespace SportsStore.Domain.Entities
 {
     public class Translator
     {
+        private static string ReplaceSpecialCharacters(string input)
+        {
+            string rs = "T&C\u2019s";
+            string output = input.Replace(rs, "Terms and Conditions");
+            return output;
+        }
+
         public static string ManualTranslate(string sentence)
         {
             string ret;
@@ -33,7 +40,8 @@ namespace SportsStore.Domain.Entities
                 to_language = @"en";
             }
 
-            string translationString = GoogleTranslate(sentence, from_language, to_language);
+            string fullSentence = ReplaceSpecialCharacters(sentence);
+            string translationString = fullSentence.Length > 0 ? GoogleTranslate(fullSentence, from_language, to_language) : "";
             return WebUtility.HtmlDecode(translationString);
         }
 
