@@ -112,6 +112,7 @@ namespace SportsStore.WebUI.Controllers {
 
         public ActionResult AddMultiple(IEnumerable<Product> products)
         {
+            int[] errorCounts = ModelState.Values.Select(x => x.Errors.Count()).ToArray();
             if (ModelState.IsValid)
             {
                 int counter = 0;
@@ -140,6 +141,8 @@ namespace SportsStore.WebUI.Controllers {
         {
             IList<Product> products = new List<Product>();
 
+            ProgressBarFunctions.SendProgress("Process in progress...", 0, 100);
+
             IEnumerable<string> productURLs = null;
             if (url.ToLower().Contains("next"))
             {
@@ -150,8 +153,8 @@ namespace SportsStore.WebUI.Controllers {
                 productURLs = this.bodenParser.ParseBodenProductList(url);
             }
 
-            // Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
-            // IEnumerable<string> productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
+            Utilities.WriteToBinaryFile(@"c:\temp\urls.dat", productURLs);
+            // productURLs = Utilities.ReadFromBinaryFile<IEnumerable<string>>(@"c:\temp\urls.dat");
             for (int i = 0; i < productURLs.Count(); i++)
             {
                 string productURL = productURLs.ElementAt(i);
@@ -173,14 +176,14 @@ namespace SportsStore.WebUI.Controllers {
                 ProgressBarFunctions.SendProgress("Process in progress...", i, productURLs.Count());
             }
 
-            // Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
+            Utilities.WriteToBinaryFile(@"c:\temp\products.dat", products);
             // products = Utilities.ReadFromBinaryFile<IList<Product>>(@"c:\temp\products.dat");
 
             // Prepare the gender dropdown list. 
-            ViewBag.genderSelectList = GenderClass.Genders.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() });
+            ViewBag.genderSelectList = GenderClass.Genders.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() }).ToArray();
 
             // Prepare the category dropdown list.
-            ViewBag.categorySelectList = CategoryClass.Categories.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() }); 
+            ViewBag.categorySelectList = CategoryClass.Categories.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() }).ToArray(); 
 
             return View("EditProducts", products);
         }

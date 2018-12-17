@@ -67,8 +67,15 @@ namespace SportsStore.Domain.Entities
 
             if (ajaxLoaded == true)
             {
-                wait.Until(x => (long)((IJavaScriptExecutor)x).ExecuteScript("return jQuery.active") == 0);
-                Console.WriteLine("Ajax loading finished.");
+                try
+                {
+                    wait.Until(x => (long)((IJavaScriptExecutor)x).ExecuteScript("return jQuery.active") == 0);
+                    Console.WriteLine("Javascript loading finished.");
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    Console.WriteLine("Timeout. Javascript loading failed.");
+                }
             }
 
             return ajaxLoaded;

@@ -3,7 +3,7 @@
     [Title]				NVARCHAR (1000)		NOT NULL,
 	[TitleCN]			NVARCHAR (1000)		NOT NULL,
     [Brand]				NVARCHAR (100)		NOT NULL, 
-	[ProductID]			CHAR(100)			NOT NULL,
+	[ProductID]			VARCHAR(100)		NOT NULL,
 	[Gender]			INT					NOT NULL,
     [Description]		NVARCHAR (MAX)		NOT NULL,
 	[DescriptionCN]		NVARCHAR (MAX)		NOT NULL,

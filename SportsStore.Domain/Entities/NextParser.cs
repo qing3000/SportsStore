@@ -97,7 +97,7 @@ namespace SportsStore.Domain.Entities
                 }
                 else
                 {
-                    product.Description = "";
+                    product.Description = "Desciption";
                 }
             }
 
@@ -129,6 +129,7 @@ namespace SportsStore.Domain.Entities
             }
 
             // Parse the image links
+            product.ThumbnailLink = "URL";
             HtmlNode imgLinksNode = rootNode.SelectSingleNode(@"//div[@class=""ThumbNailNavClip""]");
             IList<string> imgLinks = new List<string>();
             if (imgLinksNode != null)
@@ -152,7 +153,7 @@ namespace SportsStore.Domain.Entities
                 }
             }
 
-            product.ImageLinks = string.Join(@";", imgLinks);
+            product.ImageLinks = imgLinks.Count > 0 ? string.Join(@";", imgLinks) : "URLs";
             product.InsertTime = DateTime.Now;
             product.UpdateTime = DateTime.Now;
 

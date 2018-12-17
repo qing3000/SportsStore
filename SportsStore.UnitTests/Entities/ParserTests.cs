@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Web.Mvc;
 
 namespace SportsStore.Domain.Entities.Tests
 {
@@ -119,6 +120,18 @@ namespace SportsStore.Domain.Entities.Tests
                     data[1].Index,
                     data[1].Index + data[1].Length);
             }
+        }
+
+        [TestMethod()]
+        public void TestTemp()
+        {
+            IList<string> ss = new List<string>();
+            foreach (EGender oneKey in GenderClass.Genders.Keys)
+            {
+                ss.Add(GenderClass.Genders[oneKey].Item1);
+            }
+
+            IEnumerable<SelectListItem> genderSelectList = GenderClass.Genders.Select(x => new SelectListItem() { Text = x.Value.Item2, Value = x.Key.ToString() });
         }
     }
 }

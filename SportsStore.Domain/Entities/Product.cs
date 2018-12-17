@@ -55,7 +55,7 @@ namespace SportsStore.Domain.Entities
         static public Dictionary<EGender, Tuple<string, string>> Genders = new Dictionary <EGender, Tuple<string, string>>
         {
             { EGender.MALE, Tuple.Create(@"Boy", @"男孩") },
-            { EGender.MALE, Tuple.Create(@"Girl", @"女孩") },
+            { EGender.FEMALE, Tuple.Create(@"Girl", @"女孩") },
             { EGender.UNISEX, Tuple.Create(@"Unisex", @"中性") }
         };
     }

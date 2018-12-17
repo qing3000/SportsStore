@@ -19,7 +19,7 @@ namespace SportsStore.Domain.Concrete
             bool ret = false;
             if (product.ID == 0)
             {
-                Product dbEntry = context.Products.First(x => x.ProductID == product.ProductID && x.Brand == product.Brand);
+                Product dbEntry = context.Products.FirstOrDefault(x => x.ProductID == product.ProductID && x.Brand == product.Brand);
                 if (dbEntry == null)
                 {
                     context.Products.Add(product);
